@@ -72,7 +72,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
 
   val routes = Routes({
 
-    case HttpRequest(httpRequest) => httpRequest match {
+    case r @ HttpRequest(httpRequest) => httpRequest match {
       case Path("/") => {
         staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, "index.html"))
       }
@@ -88,9 +88,10 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         val player = nextId()
         httpRequest.response.redirect(s"/${page}?room=${room}&player=${player}")
       }
+      case unknown => log.error(s"could not match $httpRequest contained in $r")
     }
 
-    case WebSocketHandshake(wsHandshake) => wsHandshake match {
+    case wh @ WebSocketHandshake(wsHandshake) => wsHandshake match {
       case GET(PathSegments("websocket" :: roomNumber :: Nil)) => {
         log.info("Handshake to join room " + roomNumber)
         wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
@@ -99,6 +100,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           scrumGame ! Registration(event.channel, roomNumber, secWebSocketKey);
         }))
       }
+      case unknown => log.error(s"could not match wsHandshake contained in $wh")
     }
 
     case WebSocketFrame(wsFrame) => {
@@ -115,6 +117,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       game ! Data(optRoomNumber.getOrElse("None"), wsFrame.readText())
     }
 
+    case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
   })
 
   def main(args: Array[String]) {
