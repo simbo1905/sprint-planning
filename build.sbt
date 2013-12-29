@@ -1,4 +1,4 @@
-name := """chatty-scala"""
+name := """planning-poker"""
 
 version := "0.1"
 
