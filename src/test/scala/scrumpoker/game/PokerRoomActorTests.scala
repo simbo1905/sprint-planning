@@ -162,12 +162,13 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       And("we reset")
       pokerRoom ! Reset();
 
-      And("we extract the messages sent to the channel group (3 members plus 2 reset messages)")
-      val cs: Seq[Option[Message]] = capturedMessagesSentToChannelGroup(5, mockChannelGroup)
+      And("we extract the messages sent to the channel group (3 members plus 3 reset messages)")
+      val cs: Seq[Option[Message]] = capturedMessagesSentToChannelGroup(6, mockChannelGroup)
 
       Then("the channel group been notified only of the other two remaining players cards")
-      cs(3) must equal(Some(RoomSize(3)))
-      cs(4) must equal(Some(DrawnSize(0)))
+      cs(3) must equal(Some(Reset()))
+      cs(4) must equal(Some(RoomSize(3)))
+      cs(5) must equal(Some(DrawnSize(0)))
     }
   }
 
