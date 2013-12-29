@@ -7,6 +7,6 @@ IVY_DIR=$OPENSHIFT_DATA_DIR/.ivy
 
 cd $OPENSHIFT_REPO_DIR
 
-echo ">>> $SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR run ${OPENSHIFT_INTERNAL_IP} ${OPENSHIFT_INTERNAL_PORT} <<<"
+echo ">>> $SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR run ${OPENSHIFT_DIY_IP} ${OPENSHIFT_DIY_PORT} <<<"
 
-nohup $SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR "run ${OPENSHIFT_INTERNAL_IP} ${OPENSHIFT_INTERNAL_PORT}" > ${OPENSHIFT_DIY_LOG_DIR}server.log 2>&1 &
+nohup $SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR "run ${OPENSHIFT_DIY_IP} ${OPENSHIFT_DIY_PORT}" > ${OPENSHIFT_DIY_LOG_DIR}server.log 2>&1 &
