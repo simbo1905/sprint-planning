@@ -24,7 +24,7 @@ You should see the output
 
 ```
 Serving web content out of src/main/resources
-Open a few browsers and navigate to http://localhost:8888. Start playing!
+Open a few browsers and navigate to http://localhost:8080. Start playing!
 ```
 
 You can now go to that local url and play. 

@@ -54,7 +54,7 @@ if (typeof(player) == "undefined") {
         socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/websocket/"+room);
     } else {
         // debugging a local html file point to a local server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
-        socket = new WebSocket("ws://localhost:8888/websocket/"+room);
+        socket = new WebSocket("ws://localhost:8080/websocket/"+room);
     }
 
     socket.onmessage = function(event) {

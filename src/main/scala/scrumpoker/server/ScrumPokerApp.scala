@@ -119,7 +119,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
   def main(args: Array[String]) {
     val clm = ( for( (v,i) <- args.zipWithIndex ) yield (i,v) ).toMap
     val h = clm.getOrElse(0,"localhost")
-    val p = clm.getOrElse(1,"8888").toInt
+    val p = clm.getOrElse(1,"8080").toInt
     val webServer = new WebServer(WebServerConfig(hostname=h,port=p), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
