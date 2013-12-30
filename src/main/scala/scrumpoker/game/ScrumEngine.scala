@@ -13,42 +13,55 @@
 //
 package scrumpoker.game
 
-import akka.actor.{ActorLogging, Actor, Props, ActorRef}
+import akka.actor.{ ActorLogging, Actor, Props, ActorRef }
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.group.DefaultChannelGroup
+import org.mashupbots.socko.webserver.WebSocketConnections
 
-case class Registration(channel: Channel, roomNumber: String, sessionId: String)
+case class Initialize(wsc: WebSocketConnections)
+case class Registration(roomNumber: String, playerId: Long, connectionId: String)
 case class Data(roomNumber: String, json: String)
 
 /**
  * TODO consider resource leaks and schedule to kill off rooms
- * http://stackoverflow.com/questions/8975009/netty-closing-websockets-correctly?rq=1
  */
 class ScrumGameActor extends Actor with ActorLogging {
 
   import Message._
-  
-  private val rooms = collection.mutable.Map[String, ActorRef]() // TODO a var of an immutable is better
-  
+
+  private[this] var rooms = Map.empty[String, ActorRef]
+
   def getOrCreateRoom(room: String): ActorRef = {
-    if( rooms contains room ) { 
-      return rooms(room);
+    if (rooms contains room) {
+      return rooms(room)
     } else {
       log.info(s"new PokerRoomActor created for room ${room}")
-      val newRoom = context.actorOf(Props(new PokerRoomActor(new DefaultChannelGroup())));
-      rooms += (room -> newRoom);
+      val newRoom = context.actorOf(Props(new PokerRoomActor(webSocketConnections.get)))
+      rooms += (room -> newRoom)
       return newRoom;
     }
   }
-  
-  def receive = {
+
+  var webSocketConnections: Option[WebSocketConnections] = None
+
+  def uninitialized: Receive = {
+    case Initialize(wsc) =>
+      log.info(s"becoming initialised with webSocketConnections:$webSocketConnections")
+      webSocketConnections = Some(wsc)
+      context become initialized
+    case unknown => log.error(s"Received ${unknown.getClass.getName} whilst uninitialized: $unknown")
+  }
+
+  def initialized: Receive = {
     case Data("None", text) =>
       log.warning(s"Ignoring Data with roomnumber=None and text='${text}}'")
-    case Data(roomNumber,json) =>
-      getOrCreateRoom(roomNumber) ! json.asMessage.getOrElse(None);
-    case Registration(channel, roomNumber, _) =>
-      getOrCreateRoom(roomNumber) ! channel;
+    case Data(roomNumber, json) =>
+      getOrCreateRoom(roomNumber) ! json.asMessage.getOrElse(None)
+    case r @ Registration(roomNumber, playerId, connectionId) =>
+      getOrCreateRoom(roomNumber) ! r;
     case x =>
       log.warning(s"Ignorming unknown message: ${x}");
   }
+
+  def receive = uninitialized
 }

@@ -51,10 +51,10 @@ if (typeof(player) == "undefined") {
   if (window.WebSocket) {
     if( location.hostname.length > 0 ) {
         // connect the websocket to the same host and port this page came from
-        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/websocket/"+room);
+        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/websocket/" + room + "/" + player);
     } else {
         // debugging a local html file point to a local server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
-        socket = new WebSocket("ws://localhost:8080/websocket/"+room);
+        socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
     }
 
     socket.onmessage = function(event) {

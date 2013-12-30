@@ -13,26 +13,28 @@
 //
 package scrumpoker.game
 
-import scala.collection.mutable
 import akka.actor.{ ActorLogging, Actor }
 import org.jboss.netty.channel.group.ChannelGroup
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.channel.Channel
 import argonaut.Argonaut._
+import org.mashupbots.socko.webserver.WebSocketConnections
 
 /**
  * maintains the state of a scrum poker room
  * @param socketConnections a container to hold the channels connected to this room
  */
-class PokerRoomActor(private val socketConnections: ChannelGroup) extends Actor with ActorLogging {
+class PokerRoomActor(private val webSocketConnections: WebSocketConnections) extends Actor with ActorLogging {
 
   type PlayerId = Long
+  type PlayerConnection = String
 
   private[this] var cardsDrawn = Map.empty[PlayerId, CardDrawn]
+  private[this] var playerSessions = Map.empty[PlayerId, PlayerConnection]
 
   def receive = {
-    case c: Channel => {
-      socketConnections.add(c)
+    case Registration(roomNumber, playerId, connectionId) => {
+      playerSessions += (playerId -> connectionId)
       write(roomSize)
       write(drawnSize)
     }
@@ -62,29 +64,27 @@ class PokerRoomActor(private val socketConnections: ChannelGroup) extends Actor 
     }
   }
 
-  def write(msg: TextWebSocketFrame) {
-    log.info(msg.getText)
-    socketConnections.write(msg)
+  def write(msg: String) {
+    log.info(msg)
+    playerSessions.values foreach {
+      webSocketConnections.writeText(msg, _)
+    }
   }
 
-  def roomSize: TextWebSocketFrame = {
-    val json = RoomSize(socketConnections.size()).asJson.toString()
-    new TextWebSocketFrame(json)
+  def roomSize = {
+    RoomSize(playerSessions.size).asJson.toString()
   }
 
-  def drawnSize: TextWebSocketFrame = {
-    val json = DrawnSize(cardsDrawn.size).asJson.toString()
-    new TextWebSocketFrame(json)
+  def drawnSize = {
+    DrawnSize(cardsDrawn.size).asJson.toString()
   }
 
-  def cardSet: TextWebSocketFrame = {
-    val json = CardSet(cardsDrawn.values.toList.reverse).asJson.toString()
-    new TextWebSocketFrame(json)
+  def cardSet = {
+    CardSet(cardsDrawn.values.toList.reverse).asJson.toString()
   }
 
-  def reset: TextWebSocketFrame = {
-    val json = Reset().asJson.toString()
-    new TextWebSocketFrame(json)
+  def reset = {
+    Reset().asJson.toString()
   }
 }
 

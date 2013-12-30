@@ -14,8 +14,8 @@
 package scrumpoker.server
 
 import java.io.File
+import scala.Array.canBuildFrom
 import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
@@ -29,15 +29,18 @@ import org.mashupbots.socko.routes.WebSocketFrame
 import org.mashupbots.socko.routes.WebSocketHandshake
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
+import org.mashupbots.socko.webserver.WebSocketConnections
 import com.typesafe.config.ConfigFactory
+import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
-import scrumpoker.game.{ ScrumGameActor, Registration, Data }
+import scrumpoker.game.Data
+import scrumpoker.game.Registration
+import scrumpoker.game.ScrumGameActor
+import scrumpoker.game.Initialize
 
 object ScrumGameApp extends Logger with SnowflakeIds {
-
-  import WebSocketExtensions._;
 
   val actorConfig = """
 	static-pinned-dispatcher {
@@ -91,39 +94,47 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.error(s"could not match $httpRequest contained in $r")
     }
 
-    case wh @ WebSocketHandshake(wsHandshake) => wsHandshake match {
-      case GET(PathSegments("websocket" :: roomNumber :: Nil)) => {
-        log.info("Handshake to join room " + roomNumber)
-        wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
-          val secWebSocketKey = event.secWebSocketKey;
-          log.info("Authorised connection:" + secWebSocketKey);
-          scrumGame ! Registration(event.channel, roomNumber, secWebSocketKey);
-        }))
+    case wh @ WebSocketHandshake(wsHandshake) => wsHandshake match { // TODO: onClose
+      case GET(PathSegments("websocket" :: roomNumber :: player :: Nil)) => {
+        val playerIdOpt: Option[Long] = player.toLongOpt
+        playerIdOpt match {
+          case None =>
+          case Some(playerId) =>
+            log.info("Handshake to join room " + roomNumber)
+            wsHandshake.authorize(onComplete = Some((webSocketId: String) => {
+              log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId");
+              scrumGame ! Registration(roomNumber, playerId, webSocketId);
+            }), onClose = None)
+        }
       }
       case unknown => log.error(s"could not match wsHandshake contained in $wh")
     }
 
     case WebSocketFrame(wsFrame) => {
       // Once handshaking has taken place, we can now process frames sent from the client
-      val webSocketKey = wsFrame.secWebSocketKey;
-      log.debug("chat from:" + webSocketKey);
+      log.debug("chat from:" + wsFrame.webSocketId);
 
-      val optRoomNumber = wsFrame.endPoint.pathSegments match {
-        case "websocket" :: roomNumber :: Nil => Some(roomNumber)
-        case _ => None
+      wsFrame.endPoint.pathSegments match {
+        case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
+          val game = actorSystem.actorSelection("/user/scrumGame")
+          game ! Data(roomNumber, wsFrame.readText())
+        case _ =>
+          log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
+          None
       }
-
-      val game = actorSystem.actorSelection("/user/scrumGame")
-      game ! Data(optRoomNumber.getOrElse("None"), wsFrame.readText())
     }
 
     case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
   })
 
+  /**
+   * Command line options are interface/ip to bind to, web port to bind to, and optional websockets port [for openshift]
+   */
   def main(args: Array[String]) {
     val clm = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
     val h = clm.getOrElse(0, "localhost")
     val p = clm.getOrElse(1, "8080").toInt
+
     val webServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
@@ -131,6 +142,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         actorSystem.shutdown()
       }
     })
+
+    val connections: WebSocketConnections = webServer.webSocketConnections
+    scrumGame ! Initialize(connections)
     webServer.start()
 
     System.out.println(s"Serving web content out of ${contentPath}")
