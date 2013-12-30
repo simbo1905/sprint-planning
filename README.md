@@ -1,6 +1,6 @@
 # Planning Poker
 
-A lightweight implimentation of Planning Poker / Scrum Poker using JavaScript and Websockets with the serverside implimented with Akka/Socko. 
+A lightweight implementation of Planning Poker / Scrum Poker using JavaScript and Websockets with the serverside implimented with Akka/Socko. 
 
 ## Build Prerequisites
 
@@ -10,9 +10,9 @@ A lightweight implimentation of Planning Poker / Scrum Poker using JavaScript an
 ## Building
 
 ```sh
-git clone [git-repo-url] planning-poker
+git clone https://github.com/simbo1905/planning-poker.git planning-poker
 cd planning-poker
-sbt run
+sbt test
 ```
 
 ## Running

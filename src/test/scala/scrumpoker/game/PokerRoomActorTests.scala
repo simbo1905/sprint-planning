@@ -66,7 +66,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       messages must equal(Seq(RoomSize(1), DrawnSize(0), RoomSize(2), DrawnSize(1), DrawnSize(2)))
     }
 
-    it("should send which cards have been undrawn") {
+    it("should respond to undrawn cards") {
 
       Given("a pokerroom constructed with a mock websocketconnections")
       val mockWebSocketConnections = mock[WebSocketConnections]
@@ -83,7 +83,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       pokerRoom ! CardDrawn(31L, 3)
       pokerRoom ! CardUndrawn(21L)
 
-      And("we extract the messages sent to the websockets")
+      And("we extract the messages sent to the players")
       val messages: Seq[(Int, Message)] = captureRunLengthMessagesSent(24, mockWebSocketConnections)
 
       Then("the channel group has seen a card drawn sequence 0,1,2,3,2")
@@ -114,7 +114,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       And("we extract the distinct messages sent")
       val msg = captureDistinctMessagesSent(30, mockWebSocketConnections)
 
-      Then("the channel group has been sent a card set message containing cards 1, 3, 2")
+      Then("the group has been sent a card set message containing cards 1, 3, 2")
       msg.last must equal(CardSet(List(CardDrawn(21L, 5), CardDrawn(31L, 3), CardDrawn(11L, 1))))
     }
 
@@ -143,7 +143,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       And("we extract the distinct messages sent")
       val msg = captureDistinctMessagesSent(27, mockWebSocketConnections)
 
-      Then("the channel group been notified only of the other two remaining players cards")
+      Then("the group been notified only of the other two remaining players cards")
       msg.last must equal(CardSet(List(CardDrawn(31L, 3), CardDrawn(11L, 1))))
     }
 
@@ -157,7 +157,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       pokerRoom ! Registration("room1", 21L, "connection21")
       pokerRoom ! Registration("room1", 31L, "connection31")
 
-      And("notifed that 3 room members have selected a cards")
+      And("notifed that 3 room members have selected cards")
       pokerRoom ! CardDrawn(11L, 1)
       pokerRoom ! CardDrawn(21L, 2)
       pokerRoom ! CardDrawn(31L, 3)
@@ -165,10 +165,10 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       And("we reset")
       pokerRoom ! Reset();
 
-      And("we extract the messages sent to the channel group")
+      And("we extract the messages sent to the players")
       val messages: Seq[(Int, Message)] = captureRunLengthMessagesSent(30, mockWebSocketConnections)
 
-      Then("the channel group been notified only of the other two remaining players cards")
+      Then("the group is notified of the reset, room size and no cards drawn")
       messages(messages.length - 3) must equal((3, Reset()))
       messages(messages.length - 2) must equal((3, RoomSize(3)))
       messages(messages.length - 1) must equal((3, DrawnSize(0)))
