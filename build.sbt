@@ -1,6 +1,6 @@
 name := """planning-poker"""
 
-version := "0.3"
+version := "0.4"
 
 scalaVersion := "2.10.3"
 
@@ -12,4 +12,3 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.8" % "test->default",
   "org.mockito" % "mockito-core" % "1.9.5" % "test->default",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test")
-
