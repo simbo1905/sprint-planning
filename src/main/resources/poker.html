@@ -27,8 +27,9 @@ keyValuePairs.forEach(function(keyValuePair) {
 
 var player = result["player"];
 var room = result["room"];
+var port = result["port"];
 var selectedId = hash;
-console.log("player:"+player+",room:"+room+",selectedId:"+selectedId);
+console.log("player:"+player+",room:"+room+",selectedId:"+selectedId+",port:"+port);
 
 // check they were actually in a room or not and redirect as appropriate
 if (typeof(player) == "undefined") {
@@ -51,7 +52,7 @@ if (typeof(player) == "undefined") {
   if (window.WebSocket) {
     if( location.hostname.length > 0 ) {
         // connect the websocket to the same host and port this page came from
-        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/websocket/" + room + "/" + player);
+        socket = new WebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
     } else {
         // debugging a local html file point to a local server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
         socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
