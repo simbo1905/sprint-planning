@@ -80,7 +80,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     val clm = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
     val h = clm.getOrElse(0, "localhost")
     val p = clm.getOrElse(1, "8080").toInt
-    val w = clm.getOrElse(2, "8080").toInt
+    val ws = clm.getOrElse(2, "8080").toInt
 
     val routes = Routes({
 
@@ -98,7 +98,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           val page = httpRequest.endPoint.getQueryString("skin").getOrElse("poker.html")
           val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
           val player = nextId()
-          httpRequest.response.redirect(s"/${page}?room=${room}&player=${player}&port=$w")
+          httpRequest.response.redirect(s"/${page}?room=${room}&player=${player}&port=${ws}")
         }
         case unknown => log.error(s"could not match $httpRequest contained in $r")
       }
@@ -136,7 +136,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })
 
-    val webServer = new WebServer(WebServerConfig(hostname = h, port = w), routes, actorSystem)
+    val webServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -148,9 +148,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     scrumGame ! Initialize(connections)
     webServer.start()
 
-    if (p != w) {
+    if (p != ws) {
       // openshift requires second port for the websockets
-      System.out.println(s"first server is on ${w} starting as second server out on ${p}")
+      System.out.println(s"first server is on ${p} starting as second server out on ${ws}")
       val webServer2 = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
       Runtime.getRuntime.addShutdownHook(new Thread {
         override def run {
