@@ -19,12 +19,15 @@ import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.channel.Channel
 import argonaut.Argonaut._
 import org.mashupbots.socko.webserver.WebSocketConnections
+import scala.concurrent.duration._
+import akka.actor.ReceiveTimeout
+import akka.actor.PoisonPill
 
 /**
  * maintains the state of a scrum poker room
  * @param socketConnections a container to hold the channels connected to this room
  */
-class PokerRoomActor extends Actor with ActorLogging {
+class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
 
   type PlayerId = Long
   type PlayerConnection = String
@@ -32,33 +35,41 @@ class PokerRoomActor extends Actor with ActorLogging {
   private[this] var cardsDrawn = Map.empty[PlayerId, CardDrawn]
   private[this] var playerSessions = Map.empty[PlayerId, PlayerConnection]
 
+  context.setReceiveTimeout(1 hour)
+
   def receive = {
-    case Registration(roomNumber, playerId, connectionId) => {
+    case Registration(roomNumber, playerId, connectionId) =>
       playerSessions += (playerId -> connectionId)
       sender ! Response(Seq(roomSize, drawnSize), playerSessions.values.toSet)
-    }
-    case cd: CardDrawn => {
+    case cd: CardDrawn =>
       cardsDrawn += (cd.player -> cd)
       sender ! Response(Seq(drawnSize), playerSessions.values.toSet)
-    }
-    case cud: CardUndrawn => {
+    case cud: CardUndrawn =>
       cardsDrawn -= cud.player
       sender ! Response(Seq(drawnSize), playerSessions.values.toSet)
-    }
-    case r: Reveal => {
+    case r: Reveal =>
       sender ! Response(Seq(cardSet), playerSessions.values.toSet)
-    }
-    case exit: PlayerExit => {
-      cardsDrawn -= exit.player
-      sender ! Response(Seq(roomSize), playerSessions.values.toSet)
-    }
-    case r: Reset => {
+    case r: Reset =>
       cardsDrawn = Map.empty[PlayerId, CardDrawn]
       sender ! Response(Seq(reset, roomSize, drawnSize), playerSessions.values.toSet)
-    }
-    case unknown => {
+    case exit: PlayerExit =>
+      cardsDrawn -= exit.player
+      playerSessions -= exit.player
+      sender ! Response(Seq(roomSize), playerSessions.values.toSet)
+    case Closed(connection) =>
+      val inverted = (Map() ++ playerSessions.map(_.swap))
+      inverted get connection match {
+        case None =>
+        case Some(player) =>
+          cardsDrawn -= player
+          playerSessions -= player
+          sender ! Response(Seq(roomSize), playerSessions.values.toSet)
+      }
+    case ReceiveTimeout =>
+      log.info(s"Shutting down roomNumber:${roomNumber} after recieve timeout")
+      self ! PoisonPill
+    case unknown =>
       log.warning(s"Ignoring unknown message $unknown")
-    }
   }
 
   def roomSize = {

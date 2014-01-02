@@ -52,7 +52,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
     it("should send the total number of card that have been drawn") {
 
       Given("a pokerroom")
-      val pokerRoom = TestActorRef(Props(new PokerRoomActor()))
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
 
       When("2 players join")
       pokerRoom ! Registration("room1", 11L, "connection11")
@@ -71,10 +71,31 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       extract(messages) must equal(Seq(RoomSize(1), DrawnSize(0), RoomSize(2), DrawnSize(0), DrawnSize(1), DrawnSize(2)))
     }
 
+    it("should send messages to all players") {
+
+      Given("a pokerroom")
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
+
+      When("2 players join")
+      pokerRoom ! Registration("room1", 11L, "connection11")
+      pokerRoom ! Registration("room1", 21L, "connection21")
+
+      And("notifed that a card has been selected")
+      pokerRoom ! CardDrawn(11L, 1)
+
+      And("we capture the responses")
+      val messages = receiveWhile(500 milliseconds, 500 milliseconds, 6) {
+        case r: Response => r
+      }
+
+      Then("the card drawn message must be sent to both players")
+      messages.last.connections.size must equal(2)
+    }
+
     it("should respond to undrawn cards") {
 
       Given("a pokerroom")
-      val pokerRoom = TestActorRef(Props(new PokerRoomActor()))
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
 
       When("3 players join")
       pokerRoom ! Registration("room1", 11L, "connection11")
@@ -99,7 +120,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
     it("should reveal which cards have been drawn") {
 
       Given("a pokerroom")
-      val pokerRoom = TestActorRef(Props(new PokerRoomActor()))
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
 
       When("2 players join")
       pokerRoom ! Registration("room1", 11L, "connection11")
@@ -125,10 +146,57 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       extract(messages).last must equal(CardSet(List(CardDrawn(21L, 5), CardDrawn(31L, 3), CardDrawn(11L, 1))))
     }
 
+    it("should remove a players upon exit") {
+
+      Given("a pokerroom")
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
+
+      When("1 players joins and draws a card")
+      pokerRoom ! Registration("room1", 11L, "connection11")
+      pokerRoom ! CardDrawn(11L, 1)
+
+      And("the player exits the game")
+      pokerRoom ! PlayerExit(11L)
+
+      And("we capture the responses")
+      val messages = receiveWhile(500 millisecond, 500 millisecond, 10) {
+        case r: Response => r
+      }
+
+      Then("the last response message has no connections in it")
+      messages.last.connections.size must equal(0)
+
+      And("the room is now empty")
+      messages.map(_.json.head.asMessage).flatten.last must equal(RoomSize(0))
+    }
+
+    it("should remove a players upon connection closed") {
+
+      Given("a pokerroom")
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
+
+      When("1 players joins and draws a card")
+      pokerRoom ! Registration("room1", 11L, "connection11")
+
+      And("the player connection is closed")
+      pokerRoom ! Closed("connection11")
+
+      And("we capture the responses")
+      val messages = receiveWhile(500 millisecond, 500 millisecond, 10) {
+        case r: Response => r
+      }
+
+      Then("the last response message has no connections in it")
+      messages.last.connections.size must equal(0)
+
+      And("the room is now empty")
+      messages.map(_.json.head.asMessage).flatten.last must equal(RoomSize(0))
+    }
+
     it("should remove a players card on exit") {
 
       Given("a pokerroom")
-      val pokerRoom = TestActorRef(Props(new PokerRoomActor()))
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
 
       When("3 players join")
       pokerRoom ! Registration("room1", 11L, "connection11")
@@ -157,7 +225,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
 
     it("should respond to a reset correctly") {
       Given("a pokerroom")
-      val pokerRoom = TestActorRef(Props(new PokerRoomActor()))
+      val pokerRoom = TestActorRef(Props(new PokerRoomActor("room99")))
 
       When("3 players join")
       pokerRoom ! Registration("room1", 11L, "connection11")

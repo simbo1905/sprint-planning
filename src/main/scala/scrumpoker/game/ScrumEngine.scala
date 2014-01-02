@@ -22,10 +22,8 @@ case class Initialize(wsc: WebSocketConnections)
 case class Registration(roomNumber: String, playerId: Long, connectionId: String)
 case class Data(roomNumber: String, json: String)
 case class Response(json: Seq[String], connections: Set[String])
+case class Closed(connectionId: String)
 
-/**
- * TODO consider resource leaks and schedule to kill off rooms
- */
 class ScrumGameActor extends Actor with ActorLogging {
 
   import Message._
@@ -37,7 +35,7 @@ class ScrumGameActor extends Actor with ActorLogging {
       return rooms(room)
     } else {
       log.info(s"new PokerRoomActor created for room ${room}")
-      val newRoom = context.actorOf(Props(new PokerRoomActor))
+      val newRoom = context.actorOf(Props(new PokerRoomActor(room)))
       rooms += (room -> newRoom)
       return newRoom;
     }
@@ -49,7 +47,11 @@ class ScrumGameActor extends Actor with ActorLogging {
     case Data(roomNumber, json) =>
       getOrCreateRoom(roomNumber) forward json.asMessage.getOrElse(None)
     case r @ Registration(roomNumber, playerId, connectionId) =>
-      getOrCreateRoom(roomNumber) forward r;
+      getOrCreateRoom(roomNumber) forward r
+    case c @ Closed(_) =>
+      rooms.values foreach {
+        _ ! c
+      }
     case x =>
       log.warning(s"Ignorming unknown message: ${x}");
   }

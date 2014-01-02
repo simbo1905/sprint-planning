@@ -41,6 +41,7 @@ import scrumpoker.game.Registration
 import scrumpoker.game.ScrumGameActor
 import scrumpoker.game.Initialize
 import scrumpoker.game.Response
+import scrumpoker.game.Closed
 
 object ScrumGameApp extends Logger with SnowflakeIds {
 
@@ -99,7 +100,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
                     webServer.webSocketConnections.writeText(_, connections)
                   }
                 }
-              }), onClose = None)
+              }), onClose = Some((webSocketId: String) => {
+                scrumGame ! Closed(webSocketId)
+              }))
           }
         }
         case unknown => log.error(s"could not match wsHandshake contained in $wh")
