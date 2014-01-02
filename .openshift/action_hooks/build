@@ -9,4 +9,4 @@ cd $OPENSHIFT_REPO_DIR
 
 SBT_OPTS="-XX:MaxPermSize=256m -Xmx768m"
 
-$SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR package 
+$SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR assembly
