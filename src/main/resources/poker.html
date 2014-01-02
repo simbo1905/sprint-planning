@@ -51,10 +51,10 @@ if (typeof(player) == "undefined") {
   }
   if (window.WebSocket) {
     if( location.hostname.length > 0 ) {
-        // connect the websocket to the same host and port this page came from
+        // connect the websocket to the same host and specified port passing the room number and player id
         socket = new WebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
     } else {
-        // debugging a local html file point to a local server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
+        // debugging a local html file point to any server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
         socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
     }
 
@@ -127,7 +127,7 @@ if (typeof(player) == "undefined") {
     }
 
     /*
-    Invoked by user selected a card.
+    Invoked when user selectes a card.
     Sends a "CardDrawn" message to the server.
     */
     function sp_sendCardSelection(player, cardNumber, cardId) {
@@ -148,7 +148,7 @@ if (typeof(player) == "undefined") {
     }
 
     /*
-    Invoked when the user has unselected card
+    Invoked when the user has unselected  their card
     Sends the CardUndrawn message to the server
     */
     function sp_cardUnSelected(player) {
