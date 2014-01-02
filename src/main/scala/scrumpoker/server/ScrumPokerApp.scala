@@ -64,6 +64,12 @@ object ScrumGameApp extends Logger with SnowflakeIds {
 
     var webServer: WebServer = null
 
+    def writeResponses(r: Response) {
+      r.json foreach {
+        webServer.webSocketConnections.writeText(_, r.connections)
+      }
+    }
+
     val routes = Routes({
 
       case r @ HttpRequest(httpRequest) => httpRequest match {
@@ -85,20 +91,18 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         case unknown => log.error(s"could not match $httpRequest contained in $r")
       }
 
-      case wh @ WebSocketHandshake(wsHandshake) => wsHandshake match { // TODO: onClose
+      case wh @ WebSocketHandshake(wsHandshake) => wsHandshake match {
         case GET(PathSegments("websocket" :: roomNumber :: player :: Nil)) => {
           val playerIdOpt: Option[Long] = player.toLongOpt
           playerIdOpt match {
-            case None =>
+            case None => log.warn(s"Could not parse $player as long in handsake $wsHandshake")
             case Some(playerId) =>
-              log.info("Handshake to join room " + roomNumber)
+              log.info(s"Handshake for player $playerId to join room $roomNumber")
               wsHandshake.authorize(onComplete = Some((webSocketId: String) => {
                 log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
                 val future = scrumGame ? Registration(roomNumber, playerId, webSocketId)
                 future onSuccess {
-                  case Response(jsons, connections) => jsons foreach {
-                    webServer.webSocketConnections.writeText(_, connections)
-                  }
+                  case r: Response => writeResponses(r)
                 }
               }), onClose = Some((webSocketId: String) => {
                 scrumGame ! Closed(webSocketId)
@@ -117,9 +121,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             val game = actorSystem.actorSelection("/user/scrumGame")
             val future = game ? Data(roomNumber, wsFrame.readText())
             future onSuccess {
-              case Response(jsons, connections) => jsons foreach {
-                webServer.webSocketConnections.writeText(_, connections)
-              }
+              case r: Response => writeResponses(r)
             }
           case _ =>
             log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")

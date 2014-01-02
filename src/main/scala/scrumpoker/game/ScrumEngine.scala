@@ -17,13 +17,18 @@ import akka.actor.{ ActorLogging, Actor, Props, ActorRef }
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.mashupbots.socko.webserver.WebSocketConnections
+import akka.actor.PoisonPill
 
 case class Initialize(wsc: WebSocketConnections)
 case class Registration(roomNumber: String, playerId: Long, connectionId: String)
 case class Data(roomNumber: String, json: String)
 case class Response(json: Seq[String], connections: Set[String])
 case class Closed(connectionId: String)
+case class Stop(room: String)
 
+/**
+ * Supervises a set of poker room actor children and adaps the websockets messages to the game messages
+ */
 class ScrumGameActor extends Actor with ActorLogging {
 
   import Message._
@@ -34,7 +39,7 @@ class ScrumGameActor extends Actor with ActorLogging {
     if (rooms contains room) {
       return rooms(room)
     } else {
-      log.info(s"new PokerRoomActor created for room ${room}")
+      log.info(s"New PokerRoomActor created for room ${room}")
       val newRoom = context.actorOf(Props(new PokerRoomActor(room)))
       rooms += (room -> newRoom)
       return newRoom;
@@ -51,6 +56,14 @@ class ScrumGameActor extends Actor with ActorLogging {
     case c @ Closed(_) =>
       rooms.values foreach {
         _ ! c
+      }
+    case Stop(room) =>
+      rooms get room match {
+        case None => log.warning(s"sent a stop for a room which we don't contain room:$room rooms.size=${rooms.size}")
+        case Some(c) =>
+          log.info(s"Stopping PokerRoomActor for room ${room}")
+          rooms -= room
+          c ! PoisonPill
       }
     case x =>
       log.warning(s"Ignorming unknown message: ${x}");

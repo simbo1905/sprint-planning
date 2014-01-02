@@ -25,7 +25,6 @@ import akka.actor.PoisonPill
 
 /**
  * maintains the state of a scrum poker room
- * @param socketConnections a container to hold the channels connected to this room
  */
 class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
 
@@ -35,7 +34,7 @@ class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
   private[this] var cardsDrawn = Map.empty[PlayerId, CardDrawn]
   private[this] var playerSessions = Map.empty[PlayerId, PlayerConnection]
 
-  context.setReceiveTimeout(1 hour)
+  context.setReceiveTimeout(20 minutes)
 
   def receive = {
     case Registration(roomNumber, playerId, connectionId) =>
@@ -66,8 +65,7 @@ class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
           sender ! Response(Seq(roomSize), playerSessions.values.toSet)
       }
     case ReceiveTimeout =>
-      log.info(s"Shutting down roomNumber:${roomNumber} after recieve timeout")
-      self ! PoisonPill
+      context.parent ! Stop(roomNumber)
     case unknown =>
       log.warning(s"Ignoring unknown message $unknown")
   }
