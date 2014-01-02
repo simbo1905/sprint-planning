@@ -95,8 +95,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
                 log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
                 val future = scrumGame ? Registration(roomNumber, playerId, webSocketId)
                 future onSuccess {
-                  case Response(json, connections) =>
-                    webServer.webSocketConnections.writeText(json, connections)
+                  case Response(jsons, connections) => jsons foreach {
+                    webServer.webSocketConnections.writeText(_, connections)
+                  }
                 }
               }), onClose = None)
           }
@@ -113,8 +114,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             val game = actorSystem.actorSelection("/user/scrumGame")
             val future = game ? Data(roomNumber, wsFrame.readText())
             future onSuccess {
-              case Response(json, connections) =>
-                webServer.webSocketConnections.writeText(json, connections)
+              case Response(jsons, connections) => jsons foreach {
+                webServer.webSocketConnections.writeText(_, connections)
+              }
             }
           case _ =>
             log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")

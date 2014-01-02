@@ -3,7 +3,7 @@ package scrumpoker.server
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
- * Twitters algorithm for generating unique tweet Ids within a cluster that approximately sort on time
+ * Twitter's algorithm for generating unique tweet Ids within a cluster that approximately sort on time
  * https://github.com/twitter/snowflake/
  */
 trait SnowflakeIds extends Logger {
@@ -36,7 +36,7 @@ trait SnowflakeIds extends Logger {
 
   /**
    * @see https://github.com/twitter/snowflake/blob/master/src/main/scala/com/twitter/service/snowflake/IdWorker.scala
-   * @return A unique id based on twitters tweet id agorithm 'snowflake'
+   * @return A unique id based on twitter's tweet id algorithm 'snowflake'
    */
   def nextId(): Long = synchronized {
     var timestamp = timeGen()

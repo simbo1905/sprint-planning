@@ -35,29 +35,26 @@ class PokerRoomActor extends Actor with ActorLogging {
   def receive = {
     case Registration(roomNumber, playerId, connectionId) => {
       playerSessions += (playerId -> connectionId)
-      sender ! roomSize
-      sender ! drawnSize
+      sender ! Response(Seq(roomSize, drawnSize), playerSessions.values.toSet)
     }
     case cd: CardDrawn => {
       cardsDrawn += (cd.player -> cd)
-      sender ! drawnSize
+      sender ! Response(Seq(drawnSize), playerSessions.values.toSet)
     }
     case cud: CardUndrawn => {
       cardsDrawn -= cud.player
-      sender ! drawnSize
+      sender ! Response(Seq(drawnSize), playerSessions.values.toSet)
     }
     case r: Reveal => {
-      sender ! cardSet
+      sender ! Response(Seq(cardSet), playerSessions.values.toSet)
     }
     case exit: PlayerExit => {
       cardsDrawn -= exit.player
-      sender ! roomSize
+      sender ! Response(Seq(roomSize), playerSessions.values.toSet)
     }
     case r: Reset => {
       cardsDrawn = Map.empty[PlayerId, CardDrawn]
-      sender ! reset
-      sender ! roomSize
-      sender ! drawnSize
+      sender ! Response(Seq(reset, roomSize, drawnSize), playerSessions.values.toSet)
     }
     case unknown => {
       log.warning(s"Ignoring unknown message $unknown")
@@ -65,19 +62,19 @@ class PokerRoomActor extends Actor with ActorLogging {
   }
 
   def roomSize = {
-    Response(RoomSize(playerSessions.size).asJson.toString(), playerSessions.values.toSet)
+    RoomSize(playerSessions.size).asJson.toString()
   }
 
   def drawnSize = {
-    Response(DrawnSize(cardsDrawn.size).asJson.toString(), playerSessions.values.toSet)
+    DrawnSize(cardsDrawn.size).asJson.toString()
   }
 
   def cardSet = {
-    Response(CardSet(cardsDrawn.values.toList.reverse).asJson.toString(), playerSessions.values.toSet)
+    CardSet(cardsDrawn.values.toList.reverse).asJson.toString()
   }
 
   def reset = {
-    Response(Reset().asJson.toString(), playerSessions.values.toSet)
+    Reset().asJson.toString()
   }
 }
 

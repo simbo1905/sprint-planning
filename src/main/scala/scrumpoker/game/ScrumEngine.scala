@@ -21,7 +21,7 @@ import org.mashupbots.socko.webserver.WebSocketConnections
 case class Initialize(wsc: WebSocketConnections)
 case class Registration(roomNumber: String, playerId: Long, connectionId: String)
 case class Data(roomNumber: String, json: String)
-case class Response(json: String, connections: Set[String])
+case class Response(json: Seq[String], connections: Set[String])
 
 /**
  * TODO consider resource leaks and schedule to kill off rooms
