@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Planning Poker Html Test Page</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+</head>
+<body>
+<table border=0 id="mytable">
+    <tr>
+        <td onclick='SelectRow(1)' id='cell_1,1'>
+            {"size":1,"mType":"DrawnSize"}
+        </td>
+    </tr>
+
+    <tr>
+        <td onclick='SelectRow(2)' id='cell_2,1'>
+            {"size":3,"mType":"DrawnSize"}
+        </td>
+    </tr>
+
+    <tr>
+        <td onclick='SelectRow(3)' id='cell_3,1'>
+            {"size":0,"mType":"DrawnSize"}
+        </td>
+    </tr>
+
+    <tr>
+        <td onclick='SelectRow(4)' id='cell_4,1'>
+            {"cards":[{"player":1,"card":2},{"player":3,"card":4}],"mType":"CardSet"}
+        </td>
+    </tr>
+
+    <tr>
+        <td onclick='SelectRow(5)' id='cell_5,1'>
+            {"size":5,"mType":"RoomSize"}
+        </td>
+    </tr>
+
+</table>
+<form onsubmit="return false;">
+    <input type="text" name="fakeJson" id="fakeJson" value=""/>
+    <input type="button" value="Fake This Json Arriving" onclick="fake_arrives(this.form.fakeJson.value)" />
+    <script>
+
+        //{"size":99,"mType":"RoomSize"}
+        //{"player":99,"card":9,"mType":"CardDrawn"}
+        //{"player":99,"mType":"CardUndrawn"}
+        //{"size":99,"mType":"DrawnSize"}
+        //{"mType":"Reveal"}
+        //{"cards":[{"player":1,"card":2},{"player":3,"card":4}],"mType":"CardSet"}
+
+        var table = document.getElementById('mytable');
+        var currentRow=-1;
+        function SelectRow(newRow)
+        {
+            var fakeJson = document.getElementById('fakeJson');
+            for(var i=1;i<2;++i)
+            {
+                var cell=document.getElementById('cell_'+newRow+','+i);
+                cell.style.background='#AAF';
+                if(currentRow!=-1)
+                {
+                    var cell=document.getElementById('cell_'+currentRow+','+i);
+                    cell.style.background='#FFF';
+                }
+            }
+
+            currentRow=newRow;
+            fakeJson.value = table.rows[parseInt(currentRow)-1].cells[0].innerHTML;
+        }
+
+        function IsSelected()
+        {
+            return currentRow==-1?false:true;
+        }
+
+        function GetSelectedRow()
+        {
+            return currentRow;
+        }
+
+        var fake_socket = {};
+        fake_socket.onmessage = function(event) {
+            var msg = JSON.parse(event.data);
+            switch(msg.mType){
+                case 'RoomSize':
+                    sp_recievedRoomSize(msg.size);
+                    break;
+                case 'DrawnSize':
+                    sp_recievedDrawnSize(msg.size);
+                    break;
+                case 'CardSet':
+                    sp_recievedCardSet(msg.cards);
+                    break;
+                default:
+                    console.log('unknown from server: '+event.data);
+                    break;
+            }
+        };
+
+        function fake_arrives(msg){
+            var event = { data: msg };
+            fake_socket.onmessage(event);
+        }
+
+    </script>
+</form>
+<canvas id="canvas" width="200" height="100"></canvas>
+<script src="http://ocanvas.org/js/libs/ocanvas-2.4.0.min.js"></script>
+<script>
+
+    var hash = (location.hash=="")? -1 : location.hash.slice(1);
+
+    var player = 3; // allocated by server when you enter room
+    var room = 4; // room selected by user at index.html
+    var selectedId = hash; // card currently selected by user read from #x at end of browser address
+
+    console.log("player:"+player+",room:"+room+",selectedId:"+selectedId);
+
+    function sp_send(msg){
+        console.log('sp_send("'+msg+'")');
+    }
+
+    /*
+    Invoked to reset the room.
+    */
+    function sp_sendReset() {
+	    var r=confirm("Reset room?");
+		if (r==true) {
+	        var msg = '{"mType":"Reset"}';
+	        console.log("out> "+msg);
+	        sp_send(msg);
+		}
+    }
+
+    /*
+    Invoked by user selected a card.
+    Sends a "CardDrawn" message to the server.
+    */
+    function sp_sendCardSelection(player, cardNumber, cardId) {
+        var msg = '{"player":'+player+',"card":'+cardNumber+',"mType":"CardDrawn"}';
+        console.log("out> "+msg);
+        location.hash = cardId;
+        sp_send(msg);
+    }
+
+    /*
+        Invoked when the user has unselected card
+        Sends the CardUndrawn message to the server
+    */
+    function pp_cardUnSelected(player) {
+        var msg = '{"player":'+player+',"mType":"CardUndrawn"}';
+        console.log("out> "+msg);
+        location.hash = "";
+        sp_send(msg);
+    }
+
+    /*
+    Invoked when a "RoomSize" message arrives due to a player entering or leave the room.
+    Should be used to give a visual indication of the joining or leaving of players
+    */
+    function sp_recievedRoomSize(size) {
+       console.log('sp_recievedRoomSize:'+size);
+       window.document.title = 'Planning Poker '+size+' players';
+       showRoomSize(size);
+    }
+
+    /*
+    Invoked when a "DrawnSize" message arrives due to players drawning or undrawning cards.
+    Should be used to give a visual indication of cards face down on the table
+    */
+    function sp_recievedDrawnSize(size) {
+        console.log('sp_recievedDrawnSize:'+size);
+        showDrawnSize(size);
+    }
+
+    /*
+    Invoked when the "CardSet" message arrives when all the cards are to be revealed.
+    Should render all of the cards to end this round of the game.
+    */
+    function sp_recievedCardSet(cards) {
+        console.log('sp_showCards:'+JSON.stringify(cards));
+        var chosen = []
+        cards.forEach(function(cardDrawn) {
+            chosen.push(cardDrawn.card)
+        });
+        showDrawnCards(chosen)
+    }
+</script>
+<script>
+    // game oCanvas skin
+    var c = document.querySelector("#canvas"),
+    ctx = c.getContext("2d");
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+
+    var canvas = oCanvas.create({ canvas: "#canvas", background: "#ffffff" });
+
+    var resetButton = canvas.display.rectangle({
+        x: 165,
+        y: 275,
+        width: 110,
+        height: 45,
+        stroke: "outside 2px rgba(0, 0, 0, 0.5)"
+    });
+
+    resetButton.bind("click tap", function () {
+        sp_sendReset();
+    });
+
+    var resetText = canvas.display.text({
+        x: 55,
+        y: 7,
+        origin: { x: "center", y: "top" },
+        font: "bold 30px sans-serif",
+        text: "Reset",
+        fill: "#000"
+    });
+
+    resetButton.addChild(resetText);
+
+    canvas.addChild(resetButton);
+
+    var revealButton = canvas.display.rectangle({
+        x: 50,
+        y: 275,
+        width: 110,
+        height: 45,
+        stroke: "outside 2px rgba(0, 0, 0, 0.5)"
+    });
+
+    revealButton.bind("click tap", function () {
+        sp_recievedCardSet();
+    });
+
+    var revealText = canvas.display.text({
+        x: 55,
+        y: 7,
+        origin: { x: "center", y: "top" },
+        font: "bold 30px sans-serif",
+        text: "Reveal",
+        fill: "#000"
+    });
+
+    revealButton.addChild(revealText);
+
+    canvas.addChild(revealButton);
+
+    var cardProto = canvas.display.rectangle({
+        x: 77,
+        y: 77,
+        width: 50,
+        height: 75,
+        fill: "#0aa"
+    });
+
+    function fill(selected){
+        return (selected)?"#db45be":"#0aa";
+    }
+
+    function createCard(options) {
+
+        var card = cardProto.clone({
+            x: options.x, y: options.y, fill: fill(options.s), selected: options.s
+        });
+
+        if( card.selected == true ) {
+            playerSelectedCard = card;
+        }
+
+        var characters = (""+options.v).length;
+
+        var text = canvas.display.text({
+            x: 20 + (characters*3),
+            y: 22,
+            origin: { x: "center", y: "top" },
+            font: "bold 30px sans-serif",
+            text: options.v,
+            fill: "#000"
+        });
+
+        card.addChild(text);
+
+        card.bind("click tap", function () {
+            if( playerSelectedCard != null ) {
+                playerSelectedCard.fill = "#0aa";
+            }
+            if( playerSelectedCard == this ) {
+                playerSelectedCard = null;
+                pp_cardUnSelected(player);
+            } else {
+                playerSelectedCard = this;
+                this.fill = "#db45be";
+                sp_sendCardSelection(player, options.v, options.id);
+            }
+            canvas.redraw();
+        });
+
+        canvas.addChild(card);
+
+        return card;
+    }
+
+    var xpos = -20;
+
+    function getAndIncrementXpos(increment) {
+        xpos = xpos+increment;
+        return xpos;
+    }
+
+    var cards = [];
+    var playerSelectedCard = { };
+
+    var count = 0;
+
+    function selected(count){
+        return (selectedId==count)?true:false;
+    }
+
+    //0 1 2 3 5 8 13 21 34 55 89 ?
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"0", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"1", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"2", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"3", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"5", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"8", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"13", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"21", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"34", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"55", s:selected(count), id:count}) );
+    count++;
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"89", s:selected(count), id:count}) );
+    count++;
+    // negative number means "dunno"
+    cards.push( createCard({x: getAndIncrementXpos(70), y:77, v:"-1", s:selected(count), id:count}) );
+    count++;
+
+    var xpos2 = -20;
+
+    function getAndIncrementXpos2(increment) {
+        xpos2 = xpos2+increment;
+        return xpos2;
+    }
+
+	var xpos4 = -20;
+
+    function getAndIncrementXpos4(increment) {
+        xpos4 = xpos4+increment;
+        return xpos4;
+    }
+
+    var selectedCardProto = canvas.display.rectangle({
+        x: 77,
+        y: 154,
+        width: 50,
+        height: 75,
+        fill: "#db45be"
+    });
+
+    function createSelectedCard(options) {
+
+        var card = selectedCardProto.clone({
+            x: options.x, y: options.y
+        });
+
+        canvas.addChild(card);
+
+        return card;
+    }
+
+    var selectedCards = [];
+
+    function showDrawnSize(size) {
+        console.log('selectedCards.length:'+selectedCards.length+', size:'+size);
+        if( size > selectedCards.length ) {
+            var increase = size - selectedCards.length;
+            console.log('size > selectedCards.length and increase='+increase);
+            for( i = 0; i < increase; i++ ) {
+                selectedCards.push(createSelectedCard({x: getAndIncrementXpos2(70), y: 160}));
+            }
+        } else if ( size < selectedCards.length ) {
+            var decrease = selectedCards.length - size;
+            console.log('size < selectedCards.length and decrease='+decrease);
+            for( i = 0; i < decrease; i++ ) {
+                var c = selectedCards.pop();
+                canvas.removeChild(c);
+                getAndIncrementXpos2(-70)
+            }
+        }
+    }
+    
+    function createShownCard(options) {
+        var card = selectedCardProto.clone({
+            x: options.x, y: options.y
+        });
+
+        var characters = (""+options.v).length;
+
+        var text = canvas.display.text({
+            x: 20 + (characters*3),
+            y: 22,
+            origin: { x: "center", y: "top" },
+            font: "bold 30px sans-serif",
+            text: options.v,
+            fill: "#000"
+        });
+
+        card.addChild(text);
+
+        canvas.addChild(card);
+
+        return card;
+    }
+
+	function showDrawnCards(chosen) {
+		var size = chosen.length
+		console.log('length:'+size+' cards:'+chosen)
+		
+		for( i = 0; i < ghostCards.length; i++ ) {
+            var c = ghostCards.pop();
+            canvas.removeChild(c);
+            getAndIncrementXpos3(-70)
+        }
+		
+        for( i = 0; i < selectedCards.length; i++ ) {
+            var c = selectedCards.pop();
+            canvas.removeChild(c);
+            getAndIncrementXpos2(-70)
+        }
+		
+		xpos4 = -20
+		
+		for( i = 0; i < chosen.length; i++ ) {
+        	var value = chosen[i]+""
+        	console.log('value:'+value)
+            selectedCards.push(createShownCard({x: getAndIncrementXpos4(70), y: 160, v: value}));
+		}
+	}
+
+    var ghostCardProto = canvas.display.rectangle({
+        x: 76,
+        y: 153,
+        width: 52,
+        height: 77,
+        stroke: "outside 1px #000"
+    });
+
+    function createGhostCard(options) {
+        var card = ghostCardProto.clone({
+        x: options.x, y: options.y
+        });
+
+        canvas.addChild(card);
+
+        return card;
+    }
+
+    var xpos3 = -21;
+
+    function getAndIncrementXpos3(increment) {
+        xpos3 = xpos3+increment;
+        return xpos3;
+    }
+
+    var ghostCards = [];
+
+    function showRoomSize(size) {
+        console.log('ghostCards.length:'+ghostCards.length+', size:'+size);
+        if( size > ghostCards.length ) {
+            var increase = size - ghostCards.length;
+            for( i = 0; i < increase; i++ ) {
+                ghostCards.push(createGhostCard({x: getAndIncrementXpos3(70), y:159}));
+            }
+        } else if( size < ghostCards.length ) {
+            var decrease = ghostCards.length - size;
+            console.log('size < ghostCards.length and decrease='+decrease);
+            for( i = 0; i < decrease; i++ ) {
+                var c = ghostCards.pop();
+                canvas.removeChild(c);
+                getAndIncrementXpos3(-70)
+            }
+        }
+        // cannot have more cards on the table than players in the room
+        if( size < selectedCards.length ) {
+            showDrawnSize(size);
+        }
+    }
+
+</script>
+</body>
+</html>

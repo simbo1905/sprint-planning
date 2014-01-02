@@ -1,0 +1,11 @@
+/bin
+/project/target
+/target
+/.idea
+/.idea_modules
+/.metadata
+/.settings
+/.cache
+/.classpath
+/.project
+/.README.md.swp
