@@ -7,6 +7,4 @@ IVY_DIR=$OPENSHIFT_DATA_DIR/.ivy
 
 cd $OPENSHIFT_REPO_DIR
 
-nohup $SBT_PATH/bin/sbt -sbt-dir $SBT_DIR -ivy $IVY_DIR "set offline := true" "run ${OPENSHIFT_DIY_IP} 8080 8000" < /dev/null > ${OPENSHIFT_DIY_LOG_DIR}server.log 2>&1 &
-
-
+nohup java -jar ./target/scala-2.10/planning-poker-runnable.jar ${OPENSHIFT_DIY_IP} 8080 8000 < /dev/null > ${OPENSHIFT_DIY_LOG_DIR}server.log 2>&1 &

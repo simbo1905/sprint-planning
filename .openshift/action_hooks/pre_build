@@ -7,4 +7,3 @@ else
   tar zxvf sbt.tgz sbt
   rm sbt.tgz
 fi
-
