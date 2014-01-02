@@ -24,7 +24,7 @@ import org.mashupbots.socko.webserver.WebSocketConnections
  * maintains the state of a scrum poker room
  * @param socketConnections a container to hold the channels connected to this room
  */
-class PokerRoomActor(private val webSocketConnections: WebSocketConnections) extends Actor with ActorLogging {
+class PokerRoomActor extends Actor with ActorLogging {
 
   type PlayerId = Long
   type PlayerConnection = String
@@ -35,56 +35,49 @@ class PokerRoomActor(private val webSocketConnections: WebSocketConnections) ext
   def receive = {
     case Registration(roomNumber, playerId, connectionId) => {
       playerSessions += (playerId -> connectionId)
-      write(roomSize)
-      write(drawnSize)
+      sender ! roomSize
+      sender ! drawnSize
     }
     case cd: CardDrawn => {
       cardsDrawn += (cd.player -> cd)
-      write(drawnSize)
+      sender ! drawnSize
     }
     case cud: CardUndrawn => {
       cardsDrawn -= cud.player
-      write(drawnSize)
+      sender ! drawnSize
     }
     case r: Reveal => {
-      write(cardSet)
+      sender ! cardSet
     }
     case exit: PlayerExit => {
       cardsDrawn -= exit.player
-      write(roomSize)
+      sender ! roomSize
     }
     case r: Reset => {
       cardsDrawn = Map.empty[PlayerId, CardDrawn]
-      write(reset)
-      write(roomSize)
-      write(drawnSize)
+      sender ! reset
+      sender ! roomSize
+      sender ! drawnSize
     }
     case unknown => {
       log.warning(s"Ignoring unknown message $unknown")
     }
   }
 
-  def write(msg: String) {
-    log.info(msg)
-    playerSessions.values foreach {
-      webSocketConnections.writeText(msg, _)
-    }
-  }
-
   def roomSize = {
-    RoomSize(playerSessions.size).asJson.toString()
+    Response(RoomSize(playerSessions.size).asJson.toString(), playerSessions.values.toSet)
   }
 
   def drawnSize = {
-    DrawnSize(cardsDrawn.size).asJson.toString()
+    Response(DrawnSize(cardsDrawn.size).asJson.toString(), playerSessions.values.toSet)
   }
 
   def cardSet = {
-    CardSet(cardsDrawn.values.toList.reverse).asJson.toString()
+    Response(CardSet(cardsDrawn.values.toList.reverse).asJson.toString(), playerSessions.values.toSet)
   }
 
   def reset = {
-    Reset().asJson.toString()
+    Response(Reset().asJson.toString(), playerSessions.values.toSet)
   }
 }
 

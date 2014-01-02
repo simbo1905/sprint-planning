@@ -21,6 +21,7 @@ import org.mashupbots.socko.webserver.WebSocketConnections
 case class Initialize(wsc: WebSocketConnections)
 case class Registration(roomNumber: String, playerId: Long, connectionId: String)
 case class Data(roomNumber: String, json: String)
+case class Response(json: String, connections: Set[String])
 
 /**
  * TODO consider resource leaks and schedule to kill off rooms
@@ -36,32 +37,20 @@ class ScrumGameActor extends Actor with ActorLogging {
       return rooms(room)
     } else {
       log.info(s"new PokerRoomActor created for room ${room}")
-      val newRoom = context.actorOf(Props(new PokerRoomActor(webSocketConnections.get)))
+      val newRoom = context.actorOf(Props(new PokerRoomActor))
       rooms += (room -> newRoom)
       return newRoom;
     }
   }
 
-  var webSocketConnections: Option[WebSocketConnections] = None
-
-  def uninitialized: Receive = {
-    case Initialize(wsc) =>
-      log.info(s"becoming initialised with webSocketConnections:$webSocketConnections")
-      webSocketConnections = Some(wsc)
-      context become initialized
-    case unknown => log.error(s"Received ${unknown.getClass.getName} whilst uninitialized: $unknown")
-  }
-
-  def initialized: Receive = {
+  def receive: Receive = {
     case Data("None", text) =>
       log.warning(s"Ignoring Data with roomnumber=None and text='${text}}'")
     case Data(roomNumber, json) =>
-      getOrCreateRoom(roomNumber) ! json.asMessage.getOrElse(None)
+      getOrCreateRoom(roomNumber) forward json.asMessage.getOrElse(None)
     case r @ Registration(roomNumber, playerId, connectionId) =>
-      getOrCreateRoom(roomNumber) ! r;
+      getOrCreateRoom(roomNumber) forward r;
     case x =>
       log.warning(s"Ignorming unknown message: ${x}");
   }
-
-  def receive = uninitialized
 }

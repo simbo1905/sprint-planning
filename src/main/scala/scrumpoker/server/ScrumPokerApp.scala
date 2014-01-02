@@ -35,41 +35,20 @@ import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
+import akka.pattern.ask
 import scrumpoker.game.Data
 import scrumpoker.game.Registration
 import scrumpoker.game.ScrumGameActor
 import scrumpoker.game.Initialize
+import scrumpoker.game.Response
 
 object ScrumGameApp extends Logger with SnowflakeIds {
 
-  val actorConfig = """
-	static-pinned-dispatcher {
-	  type=PinnedDispatcher
-	  executor=thread-pool-executor
-	}
-	akka {
-	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-      event-handler-startup-timeout = 60s
-	  loglevel=DEBUG
-	  actor {
-	    deployment {
-	      /static-file-router {
-	        router = round-robin
-	        nr-of-instances = 25
-	      }
-	    }
-	  }
-	}
-  """
-
   val actorSystem = ActorSystem("ScrumPokerActorSystem", ConfigFactory.parseString(actorConfig))
 
-  val scrumGame = actorSystem.actorOf(Props[ScrumGameActor], "scrumGame");
+  implicit val ec = actorSystem.dispatcher
 
-  val contentPath = scala.util.Properties.envOrElse("SP_HTML_CONTENT_PATH", "src/main/resources")
-  val contentDir = new File(contentPath);
-  val staticContentHandlerConfig = StaticContentHandlerConfig(
-    rootFilePaths = Seq(contentDir.getAbsolutePath))
+  val scrumGame = actorSystem.actorOf(Props[ScrumGameActor], "scrumGame");
 
   val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig)).withDispatcher("static-pinned-dispatcher"), "static-file-router")
 
@@ -81,6 +60,8 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     val h = clm.getOrElse(0, "localhost")
     val p = clm.getOrElse(1, "8080").toInt
     val ws = clm.getOrElse(2, "8080").toInt
+
+    var webServer: WebServer = null
 
     val routes = Routes({
 
@@ -111,8 +92,12 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             case Some(playerId) =>
               log.info("Handshake to join room " + roomNumber)
               wsHandshake.authorize(onComplete = Some((webSocketId: String) => {
-                log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId");
-                scrumGame ! Registration(roomNumber, playerId, webSocketId);
+                log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
+                val future = scrumGame ? Registration(roomNumber, playerId, webSocketId)
+                future onSuccess {
+                  case Response(json, connections) =>
+                    webServer.webSocketConnections.writeText(json, connections)
+                }
               }), onClose = None)
           }
         }
@@ -126,7 +111,11 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         wsFrame.endPoint.pathSegments match {
           case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
             val game = actorSystem.actorSelection("/user/scrumGame")
-            game ! Data(roomNumber, wsFrame.readText())
+            val future = game ? Data(roomNumber, wsFrame.readText())
+            future onSuccess {
+              case Response(json, connections) =>
+                webServer.webSocketConnections.writeText(json, connections)
+            }
           case _ =>
             log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
             None
@@ -136,7 +125,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })
 
-    val webServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
+    webServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -144,22 +133,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       }
     })
 
-    val connections: WebSocketConnections = webServer.webSocketConnections
-    scrumGame ! Initialize(connections)
     webServer.start()
-
-    if (p != ws) {
-      // openshift requires second port for the websockets
-      System.out.println(s"first server is on ${p} starting as second server out on ${ws}")
-      val webServer2 = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
-      Runtime.getRuntime.addShutdownHook(new Thread {
-        override def run {
-          webServer.stop()
-          actorSystem.shutdown()
-        }
-      })
-      webServer2.start()
-    }
 
     System.out.println(s"Serving web content out of ${contentPath}")
     System.out.println(s"Open a few browsers and navigate to http://${h}:${p}. Start playing!")
