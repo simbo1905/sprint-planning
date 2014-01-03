@@ -35,21 +35,17 @@ import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
-import akka.pattern.ask
 import scrumpoker.game.Data
 import scrumpoker.game.Registration
 import scrumpoker.game.ScrumGameActor
 import scrumpoker.game.Initialize
 import scrumpoker.game.Response
 import scrumpoker.game.Closed
+import akka.actor.ActorPath
 
 object ScrumGameApp extends Logger with SnowflakeIds {
 
   val actorSystem = ActorSystem("ScrumPokerActorSystem", ConfigFactory.parseString(actorConfig))
-
-  implicit val ec = actorSystem.dispatcher
-
-  val scrumGame = actorSystem.actorOf(Props[ScrumGameActor], "scrumGame");
 
   val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig)).withDispatcher("static-pinned-dispatcher"), "static-file-router")
 
@@ -62,13 +58,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     val p = clm.getOrElse(1, "8080").toInt
     val ws = clm.getOrElse(2, "8080").toInt
 
-    var webServer: WebServer = null
-
-    def writeResponses(r: Response) {
-      r.json foreach {
-        webServer.webSocketConnections.writeText(_, r.connections)
-      }
-    }
+    def scrumGame = actorSystem.actorSelection("/user/scrumGame")
 
     val routes = Routes({
 
@@ -100,10 +90,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
               log.info(s"Handshake for player $playerId to join room $roomNumber")
               wsHandshake.authorize(onComplete = Some((webSocketId: String) => {
                 log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
-                val future = scrumGame ? Registration(roomNumber, playerId, webSocketId)
-                future onSuccess {
-                  case r: Response => writeResponses(r)
-                }
+                scrumGame ! Registration(roomNumber, playerId, webSocketId)
               }), onClose = Some((webSocketId: String) => {
                 scrumGame ! Closed(webSocketId)
               }))
@@ -118,11 +105,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
 
         wsFrame.endPoint.pathSegments match {
           case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
-            val game = actorSystem.actorSelection("/user/scrumGame")
-            val future = game ? Data(roomNumber, wsFrame.readText())
-            future onSuccess {
-              case r: Response => writeResponses(r)
-            }
+            scrumGame ! Data(roomNumber, wsFrame.readText())
           case _ =>
             log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
             None
@@ -132,7 +115,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })
 
-    webServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
+    val webServer: WebServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -140,10 +123,11 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       }
     })
 
+    actorSystem.actorOf(Props(classOf[ScrumGameActor], webServer), "scrumGame");
+
     webServer.start()
 
     System.out.println(s"Serving web content out of ${contentPath}")
     System.out.println(s"Open a few browsers and navigate to http://${h}:${p}. Start playing!")
   }
-
 }

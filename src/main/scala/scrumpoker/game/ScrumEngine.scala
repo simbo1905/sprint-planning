@@ -18,6 +18,7 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.mashupbots.socko.webserver.WebSocketConnections
 import akka.actor.PoisonPill
+import org.mashupbots.socko.webserver.WebServer
 
 case class Initialize(wsc: WebSocketConnections)
 case class Registration(roomNumber: String, playerId: Long, connectionId: String)
@@ -27,9 +28,9 @@ case class Closed(connectionId: String)
 case class Stop(room: String)
 
 /**
- * Supervises a set of poker room actor children and adaps the websockets messages to the game messages
+ * Supervises a set of poker room actor children and adapts the websockets messages to the game message
  */
-class ScrumGameActor extends Actor with ActorLogging {
+class ScrumGameActor(webServer: WebServer) extends Actor with ActorLogging {
 
   import Message._
 
@@ -50,9 +51,9 @@ class ScrumGameActor extends Actor with ActorLogging {
     case Data("None", text) =>
       log.warning(s"Ignoring Data with roomnumber=None and text='${text}}'")
     case Data(roomNumber, json) =>
-      getOrCreateRoom(roomNumber) forward json.asMessage.getOrElse(None)
+      getOrCreateRoom(roomNumber) ! json.asMessage.getOrElse(None)
     case r @ Registration(roomNumber, playerId, connectionId) =>
-      getOrCreateRoom(roomNumber) forward r
+      getOrCreateRoom(roomNumber) ! r
     case c @ Closed(_) =>
       rooms.values foreach {
         _ ! c
@@ -65,6 +66,13 @@ class ScrumGameActor extends Actor with ActorLogging {
           rooms -= room
           c ! PoisonPill
       }
+    case Response(json, connections) => json foreach { msg =>
+      try {
+        webServer.webSocketConnections.writeText(msg, connections)
+      } catch {
+        case e: Throwable => log.error(e, s"unable to write ${msg} to ${connections} ")
+      }
+    }
     case x =>
       log.warning(s"Ignorming unknown message: ${x}");
   }
