@@ -118,6 +118,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             val content = httpRequest.nettyHttpRequest.asInstanceOf[HttpContent].content()
             if (content.isReadable) {
               val message: String = content.toString(java.nio.charset.Charset.forName("UTF8"))
+              log.debug(s"$player -> $roomNumber -> $message")
               scrumGame ! Data(roomNumber, message)
               val future = scrumGame ? PollRequest(player)
               future onComplete {

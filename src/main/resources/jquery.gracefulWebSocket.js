@@ -170,8 +170,8 @@ window.wsFallback = false;
 			}
 			
 			// create a new websocket or fallback
-			var ws = window.WebSocket ? new WebSocket(url) : new FallbackSocket();
-			//var ws = new FallbackSocket();
+			//var ws = window.WebSocket ? new WebSocket(url) : new FallbackSocket();
+			var ws = new FallbackSocket();
 			$(window).unload(function () { ws.close(); ws = null });
 			return ws;
 		}
