@@ -44,11 +44,11 @@ Press ```Ctrl+c``` to kill the process which stops the server.
 The three arguments are:
 
 1. IP/interface to bind to
-2. Port to serve static content on
-3. Websocket alternative port
-4. Graceful websocket polling port
+2. Port to serve static content
+3. Websocket alternative port (defaults to static content port)
+4. Graceful websocket polling port (defaults to static content port)
 
-In the example above Redhat Cloud has you bind to port 8080, browsers connect to get static content via port 80, browsers websockets are told to use port 8000 and if the browser cannot use websockets it is tool to poll port 80. The server only binds to the first port the others are sent to the browser as overrides based on the hosting port forwarding rules. A simple server installation could just specify "80 80 80" to run all services on the main web port.   
+In the example above to run on the Redhat Openshift Cloud you use "8080 8000 80". This binding the server to port 8080 which is mapped to from port 80. If the browser does not support websockets they will be told to poll port 80. If the browser does support websockets it is old to connect to port 8000. A simple server installation could just specify "80 80 80" to run all services on the main web port.   
 
 ## Creating A Skin
 
