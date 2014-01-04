@@ -17,9 +17,19 @@ sbt test
 
 ## Running
 
+Running from a local build:
+
 ```sh
 sbt run
 ```
+
+Create a runnable jar to deploy and starting it on a server (see .openshift/action_hooks/*)
+
+```sh
+sbt assembly
+java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 8080 8000 80
+```
+
 You should see the output 
 
 ```
@@ -30,6 +40,15 @@ Open a few browsers and navigate to http://localhost:8080. Start playing!
 You can now go to that local url and play. 
 
 Press ```Ctrl+c``` to kill the process which stops the server. 
+
+The three arguments are:
+
+1. IP/interface to bind to
+2. Port to serve static content on
+3. Websocket alternative port
+4. Graceful websocket polling port
+
+In the example above Redhat Cloud has you bind to port 8080, browsers connect to get static content via port 80, browsers websockets are told to use port 8000 and if the browser cannot use websockets it is tool to poll port 80. The server only binds to the first port the others are sent to the browser as overrides based on the hosting port forwarding rules. A simple server installation could just specify "80 80 80" to run all services on the main web port.   
 
 ## Creating A Skin
 

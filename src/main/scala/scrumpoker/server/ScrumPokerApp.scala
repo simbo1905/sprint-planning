@@ -66,8 +66,8 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     val commandLineMap = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
     val interface = commandLineMap.getOrElse(0, "localhost")
     val staticPort = commandLineMap.getOrElse(1, "8080").toInt
-    val websocketPort = commandLineMap.getOrElse(2, "8080").toInt
-    val fallbackPort = commandLineMap.getOrElse(3, "8080").toInt
+    val websocketPort = commandLineMap.getOrElse(2, staticPort.toString).toInt
+    val fallbackPort = commandLineMap.getOrElse(3, staticPort.toString).toInt
 
     def scrumGame = actorSystem.actorSelection("/user/scrumGame")
 
