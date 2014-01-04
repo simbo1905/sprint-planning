@@ -115,7 +115,7 @@ if (typeof(player) == "undefined") {
     Transmits json message to server.
     */
 	  function sp_send(message) {
-	    if (socket.readyState == WebSocket.OPEN) {
+	    if (socket.readyState == 1 ) { // WebSocket.OPEN wont be defined in IE9 etc
 	      socket.send(message);
 	    } else {
 	      console.log("The socket is not open. Reloading to reconnect page and clearing card selection.");
