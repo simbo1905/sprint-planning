@@ -8,18 +8,19 @@ git remote add upstream https://github.com/simbo1905/planning-poker.git
 git pull -s recursive -X theirs upstream master
 sbt test
 git push
-```
-
-Then ssh to the server and tail the logs else use the rhc-tail-files command
-
-```sh
-tail -1000f ${OPENSHIFT_DIY_LOG_DIR}server.log &
+rhc tail planningpoker -f ./diy/logs/server.log -o '-n100'
 ```
 
 To see the url of the running app
 
 ```sh
 rhc app show --app planningpoker
+```
+
+If you need to ssh onto the box you can tail the files with: 
+
+```sh
+tail -1000f ${OPENSHIFT_DIY_LOG_DIR}server.log &
 ```
 
 End. 
