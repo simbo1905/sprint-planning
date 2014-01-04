@@ -25,7 +25,7 @@ class PollingPlayerActor(player: String) extends Actor with ActorLogging {
 
     case PollRequest(p) =>
       assert(p == player, "was polled for wrong player. my player is $player but was polled for $p")
-      log.debug(s"poll response with size:${buffered.size}")
+      if (buffered.size > 0) log.debug(s"poll response with size:${buffered.size}")
       sender ! PollResponse(buffered.reverse)
       buffered = Seq.empty[String]
 

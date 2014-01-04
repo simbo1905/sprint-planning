@@ -10,8 +10,8 @@ socket.close()
 </script>
 <h1>Planning Poker</h1>
 <form onsubmit="return false;">
-  Input a room number: <input type="text" name="message" value=""/>
-  <input type="button" value="Chat" onclick="window.location = '/register/redirect?skin=poker.html&room='+this.form.message.value+'&fallback='+window.wsFallback" />
+  Input any room identifier: <input type="text" name="message" value=""/>
+  <input type="button" value="Enter" onclick="window.location = '/register/redirect?skin=poker.html&room='+this.form.message.value+'&fallback='+window.wsFallback" />
 </form>
 </body>
 </html>
