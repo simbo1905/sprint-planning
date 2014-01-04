@@ -83,6 +83,9 @@ if (typeof(player) == "undefined") {
 	            case 'ts':
 	            	// timestamp heartbeat
 	            	break;
+	            case 'close':
+	            	socket.close();
+	            	break;
 	            default:
 	                console.log('unknown from server: '+event.data);
 	                break;
@@ -112,10 +115,6 @@ if (typeof(player) == "undefined") {
     Transmits json message to server.
     */
 	  function sp_send(message) {
-	    if (!window.WebSocket) {
-	        console.log("No websocket so ignoring sp_send:"+message)
-	        return;
-	    }
 	    if (socket.readyState == WebSocket.OPEN) {
 	      socket.send(message);
 	    } else {
