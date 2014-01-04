@@ -64,15 +64,15 @@ class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
       playerSessions -= exit.player
       sender ! Response(Seq(roomSize), connections)
 
-    //    case Closed(connection) =>
-    //      val inverted = (Map() ++ playerSessions.map(_.swap))
-    //      inverted get connection match {
-    //        case None =>
-    //        case Some(player) =>
-    //          cardsDrawn -= player
-    //          playerSessions -= player
-    //          sender ! Response(Seq(roomSize), connections)
-    //      }
+    case Closed(connection) =>
+      val inverted = (Map() ++ playerSessions.map(_.swap))
+      inverted get connection match {
+        case None =>
+        case Some(player) =>
+          cardsDrawn -= player
+          playerSessions -= player
+          sender ! Response(Seq(roomSize), connections)
+      }
 
     case ReceiveTimeout =>
       context.parent ! StopRoom(roomNumber)

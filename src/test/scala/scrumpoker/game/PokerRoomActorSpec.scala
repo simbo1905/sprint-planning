@@ -19,18 +19,23 @@ import scala.Some
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.mashupbots.socko.webserver.WebSocketConnections
+import org.scalatest.BeforeAndAfterAll
 
 @RunWith(classOf[JUnitRunner])
-class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
+class PokerRoomActorSpec extends TestKit(ActorSystem("PokerRoomActorSpec"))
   with ImplicitSender
   with FunSpec
   with GivenWhenThen
-  with MustMatchers
-  with MockitoSugar {
+  with BeforeAndAfterAll
+  with MustMatchers {
 
   import Message._
 
   implicit val timeout = Timeout(1 seconds)
+
+  override def afterAll {
+    system.shutdown
+  }
 
   describe("a ScrumPokerRoom actor") {
 
@@ -179,7 +184,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
 
       And("the player connection is closed")
-      pokerRoom ! Closed("connection11")
+      pokerRoom ! Closed(Websocket("connection11"))
 
       And("we capture the responses")
       val messages = receiveWhile(500 millisecond, 500 millisecond, 10) {

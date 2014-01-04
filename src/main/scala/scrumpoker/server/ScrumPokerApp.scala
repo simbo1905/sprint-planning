@@ -156,7 +156,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
                 log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
                 scrumGame ! Registration(roomNumber, playerId, Websocket(webSocketId))
               }), onClose = Some((webSocketId: String) => {
-                scrumGame ! Closed(webSocketId)
+                scrumGame ! Closed(Websocket(webSocketId))
               }))
           }
         }
@@ -187,7 +187,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       }
     })
 
-    actorSystem.actorOf(Props(classOf[ScrumGameActor], webServer), "scrumGame");
+    actorSystem.actorOf(Props(classOf[ScrumGameActor], webServer.webSocketConnections), "scrumGame");
 
     webServer.start()
 

@@ -28,14 +28,14 @@ case class Polling(id: String) extends Connection
 case class Registration(roomNumber: String, playerId: Long, connection: Connection)
 case class Data(roomNumber: String, json: String)
 case class Response(jsons: Seq[String], connections: Set[Connection])
-case class Closed(connectionId: String)
+case class Closed(connection: Connection)
 case class StopRoom(room: String)
 case class StopPlayer(player: String)
 
 /**
  * Supervises a set of poker room actor children and adapts the websockets messages to the game message
  */
-class ScrumGameActor(webServer: WebServer) extends Actor with ActorLogging {
+class ScrumGameActor(webSocketConnections: WebSocketConnections) extends Actor with ActorLogging {
 
   import Message._
 
@@ -75,6 +75,7 @@ class ScrumGameActor(webServer: WebServer) extends Actor with ActorLogging {
       }
 
     case c @ Closed(_) =>
+      log.info(s"connection closed $c")
       rooms.values foreach {
         _ ! c
       }
@@ -95,12 +96,13 @@ class ScrumGameActor(webServer: WebServer) extends Actor with ActorLogging {
           log.info(s"Stopping PollingPlayerActor for player ${player}")
           polling -= player
           ref ! PoisonPill
+          self ! Closed(Polling(player))
       }
 
     case Response(json, connections) => json foreach { msg =>
-      val (websocketids, pollingids) = connections.partition(_.isInstanceOf[Websocket])
+      val (websocketids, pollingids) = connections.partition(_.isInstanceOf[Websocket]) // TODO push this work down to the room actor
       try {
-        webServer.webSocketConnections.writeText(msg, websocketids.map(_.id))
+        webSocketConnections.writeText(msg, websocketids.map(_.id))
       } catch {
         case e: Throwable => log.error(e, s"unable to write ${msg} to ${connections} ")
       }
