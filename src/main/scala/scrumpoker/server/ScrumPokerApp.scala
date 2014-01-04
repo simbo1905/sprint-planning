@@ -63,14 +63,16 @@ object ScrumGameApp extends Logger with SnowflakeIds {
   val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(staticContentHandlerConfig)).withDispatcher("static-pinned-dispatcher"), "static-file-router")
 
   /**
-   * Command line options are interface/ip to bind to, web port to bind to, and optional websockets port [for openshift]
+   * Command line options are interface/ip to bind to, web port to bind to, and optional websockets port and fallback port for polling
+   * On openshift you run the app bound on port 8080, yet websockets most connect back on port 8000 and if the browser needs to poll it does so on the standard port 80
    */
   def main(args: Array[String]) {
 
-    val clm = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
-    val h = clm.getOrElse(0, "localhost")
-    val p = clm.getOrElse(1, "8080").toInt
-    val ws = clm.getOrElse(2, "8080").toInt
+    val commandLineMap = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
+    val interface = commandLineMap.getOrElse(0, "localhost")
+    val staticPort = commandLineMap.getOrElse(1, "8080").toInt
+    val websocketPort = commandLineMap.getOrElse(2, "8080").toInt
+    val fallbackPort = commandLineMap.getOrElse(3, "8080").toInt
 
     def scrumGame = actorSystem.actorSelection("/user/scrumGame")
 
@@ -93,8 +95,8 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           val fallback = httpRequest.endPoint.getQueryString("fallback").getOrElse("false")
 
           val port = fallback match {
-            case "true" => p
-            case _ => ws
+            case "true" => fallbackPort
+            case _ => websocketPort
           }
 
           val redirect = s"/${page}?room=${room}&player=${player}&port=${port}"
@@ -179,7 +181,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.error(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })
 
-    val webServer: WebServer = new WebServer(WebServerConfig(hostname = h, port = p), routes, actorSystem)
+    val webServer: WebServer = new WebServer(WebServerConfig(hostname = interface, port = staticPort), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
@@ -192,7 +194,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     webServer.start()
 
     System.out.println(s"Serving web content out of ${contentPath}")
-    System.out.println(s"Open a few browsers and navigate to http://${h}:${p}. Start playing!")
+    System.out.println(s"Open a few browsers and navigate to http://${interface}:${staticPort}. Start playing!")
   }
 }
 
