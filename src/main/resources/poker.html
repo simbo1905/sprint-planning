@@ -10,7 +10,9 @@
 </head>
 <body>
 	<canvas id="canvas" width="200" height="100"></canvas>
-	<script src="http://ocanvas.org/js/libs/ocanvas-2.4.0.min.js"></script>
+	<script type="text/javascript" src="http://ocanvas.org/js/libs/ocanvas-2.4.0.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="jquery.gracefulWebSocket.js"></script>
 	<script>
 
 // parse the url to learn room and player number
@@ -45,35 +47,46 @@ if (typeof(player) == "undefined") {
 
   // websocket connection
 
-  var socket;
-  if (!window.WebSocket) {
-    window.WebSocket = window.MozWebSocket;
-  }
-  if (window.WebSocket) {
+    var socket;
+
     if( location.hostname.length > 0 ) {
         // connect the websocket to the same host and specified port passing the room number and player id
-        socket = new WebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
+        socket = $.gracefulWebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
     } else {
         // debugging a local html file point to any server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
         socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
     }
 
     socket.onmessage = function(event) {
-        console.log("in>  "+event.data);
-        var msg = JSON.parse(event.data);
-        switch(msg.mType){
-            case 'RoomSize':
-                sp_roomSize(msg.size);
-                break;
-            case 'DrawnSize':
-                sp_drawnSize(msg.size);
-                break;
-            case 'CardSet':
-                sp_recievedCardSet(msg.cards);
-                break;
-            default:
-                console.log('unknown from server: '+event.data);
-                break;
+        var rawMsg = JSON.parse(event.data);
+        var arrayMessage;
+        if (rawMsg instanceof Array) {
+        	arrayMessage = rawMsg;
+        } else {
+        	arrayMessage = [];
+        	arrayMessage.push(rawMsg);
+        }
+        
+        for (var i=0; i < arrayMessage.length; i++){
+        	var msg = arrayMessage[i];
+        	console.log("in>  "+msg.stringify);
+	        switch(msg.mType){
+	            case 'RoomSize':
+	                sp_roomSize(msg.size);
+	                break;
+	            case 'DrawnSize':
+	                sp_drawnSize(msg.size);
+	                break;
+	            case 'CardSet':
+	                sp_recievedCardSet(msg.cards);
+	                break;
+	            case 'ts':
+	            	// timestamp heartbeat
+	            	break;
+	            default:
+	                console.log('unknown from server: '+event.data);
+	                break;
+	        }
         }
     };
     socket.onopen = function(event) {
@@ -91,9 +104,7 @@ if (typeof(player) == "undefined") {
         socket.close()
     };
 
-  } else {
-    alert("Your browser does not support Web Sockets on port " + port + ". Game Over!");
-  }
+
 
 	// client to server methods
 

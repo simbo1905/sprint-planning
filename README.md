@@ -58,3 +58,10 @@ License
 
 Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 
+TODO
+----
+
+[ ] Add graceful fallback if websockets are not supported
+[ ] Compress the static resources
+
+

@@ -29,10 +29,9 @@ import akka.actor.PoisonPill
 class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
 
   type PlayerId = Long
-  type PlayerConnection = String
 
   private[this] var cardsDrawn = Map.empty[PlayerId, CardDrawn]
-  private[this] var playerSessions = Map.empty[PlayerId, PlayerConnection]
+  private[this] var playerSessions = Map.empty[PlayerId, Connection]
 
   def connections = {
     playerSessions.values.toSet
@@ -44,32 +43,40 @@ class PokerRoomActor(roomNumber: String) extends Actor with ActorLogging {
     case Registration(roomNumber, playerId, connectionId) =>
       playerSessions += (playerId -> connectionId)
       sender ! Response(Seq(roomSize, drawnSize), connections)
+
     case cd: CardDrawn =>
       cardsDrawn += (cd.player -> cd)
       sender ! Response(Seq(drawnSize), connections)
+
     case cud: CardUndrawn =>
       cardsDrawn -= cud.player
       sender ! Response(Seq(drawnSize), connections)
+
     case r: Reveal =>
       sender ! Response(Seq(cardSet), connections)
+
     case r: Reset =>
       cardsDrawn = Map.empty[PlayerId, CardDrawn]
       sender ! Response(Seq(reset, roomSize, drawnSize), connections)
+
     case exit: PlayerExit =>
       cardsDrawn -= exit.player
       playerSessions -= exit.player
       sender ! Response(Seq(roomSize), connections)
-    case Closed(connection) =>
-      val inverted = (Map() ++ playerSessions.map(_.swap))
-      inverted get connection match {
-        case None =>
-        case Some(player) =>
-          cardsDrawn -= player
-          playerSessions -= player
-          sender ! Response(Seq(roomSize), connections)
-      }
+
+    //    case Closed(connection) =>
+    //      val inverted = (Map() ++ playerSessions.map(_.swap))
+    //      inverted get connection match {
+    //        case None =>
+    //        case Some(player) =>
+    //          cardsDrawn -= player
+    //          playerSessions -= player
+    //          sender ! Response(Seq(roomSize), connections)
+    //      }
+
     case ReceiveTimeout =>
-      context.parent ! Stop(roomNumber)
+      context.parent ! StopRoom(roomNumber)
+
     case unknown =>
       log.warning(s"Ignoring unknown message $unknown")
   }

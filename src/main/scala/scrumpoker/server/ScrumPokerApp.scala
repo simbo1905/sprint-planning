@@ -21,6 +21,7 @@ import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes.GET
+import org.mashupbots.socko.routes.POST
 import org.mashupbots.socko.routes.HttpRequest
 import org.mashupbots.socko.routes.Path
 import org.mashupbots.socko.routes.PathSegments
@@ -35,14 +36,26 @@ import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
+import akka.pattern.ask
 import scrumpoker.game.Data
 import scrumpoker.game.Registration
 import scrumpoker.game.ScrumGameActor
-import scrumpoker.game.Initialize
 import scrumpoker.game.Response
 import scrumpoker.game.Closed
+import scrumpoker.game.Websocket
+import scrumpoker.game.PollRequest
+import scrumpoker.game.PollResponse
 import akka.actor.ActorPath
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import io.netty.handler.codec.http.HttpContent
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
+import scala.util.Failure
+import scrumpoker.game.Polling
+import scrumpoker.game.Registration
 
+// TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
 
   val actorSystem = ActorSystem("ScrumPokerActorSystem", ConfigFactory.parseString(actorConfig))
@@ -53,6 +66,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
    * Command line options are interface/ip to bind to, web port to bind to, and optional websockets port [for openshift]
    */
   def main(args: Array[String]) {
+
     val clm = (for ((v, i) <- args.zipWithIndex) yield (i, v)).toMap
     val h = clm.getOrElse(0, "localhost")
     val p = clm.getOrElse(1, "8080").toInt
@@ -60,24 +74,74 @@ object ScrumGameApp extends Logger with SnowflakeIds {
 
     def scrumGame = actorSystem.actorSelection("/user/scrumGame")
 
-    val routes = Routes({
+    val routes = Routes({ // TODO break this massive block up into orElse chains
 
       case r @ HttpRequest(httpRequest) => httpRequest match {
-        case Path("/") => {
+        case Path("/") =>
           staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, "index.html"))
-        }
-        case Path("/favicon.ico") => {
+
+        case Path("/favicon.ico") =>
           httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
-        }
-        case GET(PathSegments(fileName :: Nil)) => {
+
+        case GET(PathSegments(fileName :: Nil)) =>
           staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, fileName))
-        }
-        case GET(PathSegments("register" :: "redirect" :: Nil)) => {
+
+        case GET(PathSegments("register" :: "redirect" :: Nil)) =>
+          val player = nextId()
           val page = httpRequest.endPoint.getQueryString("skin").getOrElse("poker.html")
           val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
-          val player = nextId()
-          httpRequest.response.redirect(s"/${page}?room=${room}&player=${player}&port=${ws}")
-        }
+          val fallback = httpRequest.endPoint.getQueryString("fallback").getOrElse("false")
+
+          val port = fallback match {
+            case "true" => p
+            case _ => ws
+          }
+
+          val redirect = s"/${page}?room=${room}&player=${player}&port=${port}"
+
+          fallback match {
+            case "true" =>
+              // websockets not enabled on the browser to register this player as a polling connection using the http port
+              scrumGame ! Registration(room, player, Polling(player.toString))
+              log.debug(s"polling client redirecting to: $redirect")
+            case _ =>
+              log.debug(s"websocket client redirecting to: $redirect")
+          }
+
+          httpRequest.response.redirect(redirect)
+
+        case POST(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
+          val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, httpRequest.nettyHttpRequest)
+          if (httpRequest.nettyHttpRequest.isInstanceOf[HttpContent]) {
+            val content = httpRequest.nettyHttpRequest.asInstanceOf[HttpContent].content()
+            if (content.isReadable) {
+              val message: String = content.toString(java.nio.charset.Charset.forName("UTF8"))
+              scrumGame ! Data(roomNumber, message)
+              val future = scrumGame ? PollRequest(player)
+              future onComplete {
+                case Success(result) => result match {
+                  case r: PollResponse => httpRequest.response.write(r.toJson)
+                  case x => log.error(s"unknown response $x")
+                }
+                case Failure(failure) => httpRequest.response.write(errorJson(failure))
+              }
+            } else {
+              log.warn(s"ByteBuf content is not readable from post with headers:${httpRequest}")
+            }
+          } else {
+            log.warn(s"nettyHttpRequest is not a HttpContent request with headers:${httpRequest}")
+          }
+
+        case GET(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
+          val future = scrumGame ? PollRequest(player)
+          future onComplete {
+            case Success(result) => result match {
+              case r: PollResponse => httpRequest.response.write(r.toJson)
+              case x => log.error(s"unknown response $x")
+            }
+            case Failure(failure) => httpRequest.response.write(errorJson(failure))
+          }
+
         case unknown => log.error(s"could not match $httpRequest contained in $r")
       }
 
@@ -90,7 +154,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
               log.info(s"Handshake for player $playerId to join room $roomNumber")
               wsHandshake.authorize(onComplete = Some((webSocketId: String) => {
                 log.info(s"Authorised connection for roomNumber:$roomNumber, playerId:$playerId, webSocketId:$webSocketId")
-                scrumGame ! Registration(roomNumber, playerId, webSocketId)
+                scrumGame ! Registration(roomNumber, playerId, Websocket(webSocketId))
               }), onClose = Some((webSocketId: String) => {
                 scrumGame ! Closed(webSocketId)
               }))
@@ -130,4 +194,8 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     System.out.println(s"Serving web content out of ${contentPath}")
     System.out.println(s"Open a few browsers and navigate to http://${h}:${p}. Start playing!")
   }
+}
+
+object HttpDataFactory {
+  val value = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)
 }

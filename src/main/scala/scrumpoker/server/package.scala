@@ -1,14 +1,23 @@
 package scrumpoker
 
-import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import java.io.File
+
+import scala.concurrent.duration.DurationInt
+import scala.util.control.Exception.catching
+import scrumpoker.game.PollResponse
+
+import org.mashupbots.socko.handlers.StaticContentHandlerConfig
+
 import akka.util.Timeout
-import scala.concurrent.duration._
 
 package object server {
   implicit class StringImprovements(val s: String) {
     import scala.util.control.Exception._
     def toLongOpt = catching(classOf[NumberFormatException]) opt s.toLong
+  }
+
+  implicit class PollingResponseImprovement(val r: PollResponse) {
+    def toJson = "[" + r.jsons.mkString(",") + "]"
   }
 
   val actorConfig = """
@@ -37,4 +46,13 @@ package object server {
     rootFilePaths = Seq(contentDir.getAbsolutePath))
 
   implicit val timeout = Timeout(1 seconds)
+
+  def errorJson(t: Throwable) = {
+    "{\"error\":\"" + t.toString() + "\"}"
+  }
+
+  def tsJson() = {
+    "{\"mType\":\"ts\",  \"ts\":\"" + new java.util.Date().toString + "\"}"
+  }
+
 }

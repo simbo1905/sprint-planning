@@ -40,13 +40,13 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("the pokerroom is sent a player registration")
-      val future = pokerRoom ? Registration("room1", 99, "connection99")
+      val future = pokerRoom ? Registration("room1", 99, Websocket("connection99"))
 
       And("when we extract the response")
       val result = Await.result(future, timeout.duration).asInstanceOf[Response]
 
       Then("we must be sent the room size and a zero card drawn count")
-      result.json.map(_.asMessage).flatten must equal(Seq(RoomSize(1), DrawnSize(0)))
+      result.jsons.map(_.asMessage).flatten must equal(Seq(RoomSize(1), DrawnSize(0)))
     }
 
     it("should send the total number of card that have been drawn") {
@@ -55,8 +55,8 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("2 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
 
       And("notifed that 2 room members have selected cards")
       pokerRoom ! CardDrawn(11L, 1)
@@ -77,8 +77,8 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("2 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
 
       And("notifed that a card has been selected")
       pokerRoom ! CardDrawn(11L, 1)
@@ -98,9 +98,9 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("3 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
-      pokerRoom ! Registration("room1", 31L, "connection31")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
+      pokerRoom ! Registration("room1", 31L, Websocket("connection31"))
 
       And("notifed that 3 room members have selected cards and one unselects")
       pokerRoom ! CardDrawn(11L, 1)
@@ -123,9 +123,9 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("2 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
-      pokerRoom ! Registration("room1", 31L, "connection31")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
+      pokerRoom ! Registration("room1", 31L, Websocket("connection31"))
 
       And("notifed about cards drawn and undrawn")
       pokerRoom ! CardDrawn(11L, 1)
@@ -152,7 +152,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("1 players joins and draws a card")
-      pokerRoom ! Registration("room1", 11L, "connection11")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
       pokerRoom ! CardDrawn(11L, 1)
 
       And("the player exits the game")
@@ -167,7 +167,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       messages.last.connections.size must equal(0)
 
       And("the room is now empty")
-      messages.map(_.json.head.asMessage).flatten.last must equal(RoomSize(0))
+      messages.map(_.jsons.head.asMessage).flatten.last must equal(RoomSize(0))
     }
 
     it("should remove a players upon connection closed") {
@@ -176,7 +176,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("1 players joins and draws a card")
-      pokerRoom ! Registration("room1", 11L, "connection11")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
 
       And("the player connection is closed")
       pokerRoom ! Closed("connection11")
@@ -190,7 +190,7 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       messages.last.connections.size must equal(0)
 
       And("the room is now empty")
-      messages.map(_.json.head.asMessage).flatten.last must equal(RoomSize(0))
+      messages.map(_.jsons.head.asMessage).flatten.last must equal(RoomSize(0))
     }
 
     it("should remove a players card on exit") {
@@ -199,9 +199,9 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("3 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
-      pokerRoom ! Registration("room1", 31L, "connection31")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
+      pokerRoom ! Registration("room1", 31L, Websocket("connection31"))
 
       And("notifed that 3 room members have selected a cards")
       pokerRoom ! CardDrawn(11L, 1)
@@ -228,9 +228,9 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
       val pokerRoom = TestActorRef(Props(new PokerRoomActor("room101")))
 
       When("3 players join")
-      pokerRoom ! Registration("room1", 11L, "connection11")
-      pokerRoom ! Registration("room1", 21L, "connection21")
-      pokerRoom ! Registration("room1", 31L, "connection31")
+      pokerRoom ! Registration("room1", 11L, Websocket("connection11"))
+      pokerRoom ! Registration("room1", 21L, Websocket("connection21"))
+      pokerRoom ! Registration("room1", 31L, Websocket("connection31"))
 
       And("notifed that 3 room members have selected cards")
       pokerRoom ! CardDrawn(11L, 1)
@@ -255,6 +255,6 @@ class PokerRoomActorTests extends TestKit(ActorSystem("testSystem"))
   }
 
   def extract(rs: Seq[Response]): Seq[Message] = {
-    rs.map(_.json.map(_.asMessage)).flatten.flatten
+    rs.map(_.jsons.map(_.asMessage)).flatten.flatten
   }
 }
