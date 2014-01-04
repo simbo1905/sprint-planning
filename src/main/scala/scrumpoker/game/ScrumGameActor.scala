@@ -29,6 +29,7 @@ case class Response(jsons: Seq[String], connections: Set[Connection])
 case class Closed(connection: Connection)
 case class StopRoom(room: String)
 case class StopPlayer(player: String)
+case object Close
 
 /**
  * Supervises a set of poker room actor children and adapts the websockets messages to the game message
@@ -115,7 +116,9 @@ class ScrumGameActor(webSocketConnections: WebSocketConnections) extends Actor w
 
     case p @ PollRequest(player) =>
       polling get player match {
-        case None => log.warning(s"got a poll for $player but that is not in the polling map of size ${polling.size}")
+        case None =>
+          log.warning(s"got a poll for $player but that is not in the polling map of size ${polling.size} replying with close")
+          sender ! Close
         case Some(ref) => ref forward p
       }
 

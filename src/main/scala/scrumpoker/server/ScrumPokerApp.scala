@@ -37,14 +37,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.pattern.ask
-import scrumpoker.game.Data
-import scrumpoker.game.Registration
-import scrumpoker.game.ScrumGameActor
-import scrumpoker.game.Response
-import scrumpoker.game.Closed
-import scrumpoker.game.Websocket
-import scrumpoker.game.PollRequest
-import scrumpoker.game.PollResponse
+import scrumpoker.game._
 import akka.actor.ActorPath
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
@@ -54,6 +47,8 @@ import scala.util.Success
 import scala.util.Failure
 import scrumpoker.game.Polling
 import scrumpoker.game.Registration
+import scrumpoker.game.Close
+import scrumpoker.game.Close
 
 // TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
@@ -131,6 +126,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             } else {
               log.warn(s"ByteBuf content is not readable from post with headers:${httpRequest}")
             }
+            content.release()
           } else {
             log.warn(s"nettyHttpRequest is not a HttpContent request with headers:${httpRequest}")
           }
@@ -140,6 +136,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           future onComplete {
             case Success(result) => result match {
               case r: PollResponse => httpRequest.response.write(r.toJson)
+              case Close => httpRequest.response.write(closeJson)
               case x => log.error(s"unknown response $x")
             }
             case Failure(failure) => httpRequest.response.write(errorJson(failure))

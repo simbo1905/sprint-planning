@@ -55,4 +55,7 @@ package object server {
     "{\"mType\":\"ts\",  \"ts\":\"" + new java.util.Date().toString + "\"}"
   }
 
+  def closeJson() = {
+    "{\"mType\":\"close\",  \"ts\":\"" + new java.util.Date().toString + "\"}"
+  }
 }
