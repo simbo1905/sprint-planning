@@ -14,9 +14,6 @@
 package scrumpoker.game
 
 import akka.actor.{ ActorLogging, Actor }
-import org.jboss.netty.channel.group.ChannelGroup
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.jboss.netty.channel.Channel
 import argonaut.Argonaut._
 import org.mashupbots.socko.webserver.WebSocketConnections
 import scala.concurrent.duration._

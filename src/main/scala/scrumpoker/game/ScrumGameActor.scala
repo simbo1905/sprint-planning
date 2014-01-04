@@ -14,8 +14,6 @@
 package scrumpoker.game
 
 import akka.actor.{ ActorLogging, Actor, Props, ActorRef }
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.mashupbots.socko.webserver.WebSocketConnections
 import akka.actor.PoisonPill
 import org.mashupbots.socko.webserver.WebServer
