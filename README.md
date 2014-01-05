@@ -84,3 +84,4 @@ TODO
 
 [] Compress the static resources
 [] Check the alternate websocket port is reachable and fallback to polling if not
+[] If the room timesout check that all the polling players are shutdown

@@ -13,13 +13,12 @@
 	<script type="text/javascript" src="http://ocanvas.org/js/libs/ocanvas-2.4.0.min.js"></script>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="jquery.gracefulWebSocket.js"></script>
+	<script type="text/javascript" src="/websocket/ports"></script>
 	<script>
-
-// parse the url to learn room and player number
+// parse the address to learn room and player number
 
 var query = location.search.slice(1);
 var hash = (location.hash=="")? -1 : location.hash.slice(1);
-console.log("query:'"+query+"', hash:'"+hash+"'")
 var result = {}, keyValuePairs = query.split('&');
 
 keyValuePairs.forEach(function(keyValuePair) {
@@ -29,179 +28,114 @@ keyValuePairs.forEach(function(keyValuePair) {
 
 var player = result["player"];
 var room = result["room"];
-var port = result["port"];
+var fallback = result["fallback"];
 var selectedId = hash;
-console.log("player:"+player+",room:"+room+",selectedId:"+selectedId+",port:"+port);
 
-// check they were actually in a room or not and redirect as appropriate
-if (typeof(player) == "undefined") {
-  console.log('no player');
-  if (typeof(room) == "undefined") {
-    console.log('no room redirected to /');
-  	window.location = '/';
-  } else {
-    console.log('redirecting to room');
-    window.location = '/register/redirect?skin=poker.html&room='+room;
-  }
+var port = null;
+
+// a location with &fallback=true implies that there has been a websocket connection issue and we should force a fallback to AJAX
+if( typeof(fallback) != "undefined" && fallback == "true" ) {
+	port = fallbackPort;
+	window.forceWsFallback = true;
+} else {
+	port = websocketPort;
+	window.forceWsFallback = false;
 }
 
-  // websocket connection
+console.log("player:"+player+",room:"+room+",selectedId:"+selectedId+",port:"+port+",fallback:"+fallback);
+	</script>
+	<script type="text/javascript" src="planning-poker-protocol.js"></script>
+	<script>
+// client to server methods
 
-    var socket;
-
-    if( location.hostname.length > 0 ) {
-        // connect the websocket to the same host and specified port passing the room number and player id
-        socket = $.gracefulWebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
+/*
+Transmits json message to server.
+*/
+  function sp_send(message) {
+    if (socket.readyState == 1 ) { // WebSocket.OPEN wont be defined in IE9 etc
+      socket.send(message);
     } else {
-        // debugging a local html file point to any server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
-        socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
+      console.error("The socket is not open.");
     }
+  }
 
-    socket.onmessage = function(event) {
-        var rawMsg = JSON.parse(event.data);
-        var arrayMessage;
-        if (rawMsg instanceof Array) {
-        	arrayMessage = rawMsg;
-        } else {
-        	arrayMessage = [];
-        	arrayMessage.push(rawMsg);
-        }
-        
-        for (var i=0; i < arrayMessage.length; i++){
-        	var msg = arrayMessage[i];
-        	console.log("in>  "+msg.stringify);
-	        switch(msg.mType){
-	            case 'RoomSize':
-	                sp_roomSize(msg.size);
-	                break;
-	            case 'DrawnSize':
-	                sp_drawnSize(msg.size);
-	                break;
-	            case 'CardSet':
-	                sp_recievedCardSet(msg.cards);
-	                break;
-	            case 'ts':
-	            	// timestamp heartbeat
-	            	break;
-	            case 'close':
-	            	socket.close();
-	            	break;
-	            default:
-	                console.log('unknown from server: '+event.data);
-	                break;
-	        }
-        }
-    };
-    socket.onopen = function(event) {
-        console.log("Web Socket opened!");
-    };
-    socket.onclose = function(event) {
-        console.log("Web Socket closed");
-    };
-
-    window.onbeforeunload = function() {
-        var msg = '{"player":'+player+',"mType":"PlayerExit"}';
+/*
+Invoked to reset the room.
+*/
+function sp_sendReset() {
+    var r=confirm("Reset room?");
+	if (r==true) {
+        var msg = '{"mType":"Reset"}';
         console.log("out> "+msg);
         sp_send(msg);
-        socket.onclose = function () {}; // disable onclose handler first
-        socket.close()
-    };
+	}
+}
 
+/*
+Invoked when user selectes a card.
+Sends a "CardDrawn" message to the server.
+*/
+function sp_sendCardSelection(player, cardNumber, cardId) {
+    var msg = '{"player":'+player+',"card":'+cardNumber+',"mType":"CardDrawn"}';
+    console.log("out> "+msg);
+    location.hash = cardId;
+    sp_send(msg);
+}
 
+/*
+Invoked to reveal the cards in the game.
+Sends a "Reveal" message to the server.
+*/
+function sp_reveal(player, cardNumber, cardId) {
+    var msg = '{"mType":"Reveal"}';
+    console.log("out> "+msg);
+    sp_send(msg);
+}
 
-	// client to server methods
+/*
+Invoked when the user has unselected  their card
+Sends the CardUndrawn message to the server
+*/
+function sp_cardUnSelected(player) {
+    var msg = '{"player":'+player+',"mType":"CardUndrawn"}';
+    console.log("out> "+msg);
+    location.hash = "";
+    sp_send(msg);
+}
 
-    /*
-    Transmits json message to server.
-    */
-	  function sp_send(message) {
-	    if (socket.readyState == 1 ) { // WebSocket.OPEN wont be defined in IE9 etc
-	      socket.send(message);
-	    } else {
-	      console.log("The socket is not open. Reloading to reconnect page and clearing card selection.");
-	      window.location.assign(window.location.pathname+'?room='+room+'&player='+player)
-	    }
-	  }
+// server to client methods
 
+/*
+Invoked when player enter or leave the room
+Should be used to give a visual indication of the joining or leaving of players
+*/
+function sp_roomSize(size) {
+    console.log('sp_recievedRoomSize:'+size);
+    window.document.title = 'Planning Poker '+size+' players';
+    showRoomSize(size);
+}
 
-    /*
-    Invoked to reset the room.
-    */
-    function sp_sendReset() {
-	    var r=confirm("Reset room?");
-		if (r==true) {
-	        var msg = '{"mType":"Reset"}';
-	        console.log("out> "+msg);
-	        sp_send(msg);
-		}
-    }
-
-    /*
-    Invoked when user selectes a card.
-    Sends a "CardDrawn" message to the server.
-    */
-    function sp_sendCardSelection(player, cardNumber, cardId) {
-        var msg = '{"player":'+player+',"card":'+cardNumber+',"mType":"CardDrawn"}';
-        console.log("out> "+msg);
-        location.hash = cardId;
-        sp_send(msg);
-    }
-
-    /*
-    Invoked to reveal the cards in the game.
-    Sends a "Reveal" message to the server.
-    */
-    function sp_reveal(player, cardNumber, cardId) {
-        var msg = '{"mType":"Reveal"}';
-        console.log("out> "+msg);
-        sp_send(msg);
-    }
-
-    /*
-    Invoked when the user has unselected  their card
-    Sends the CardUndrawn message to the server
-    */
-    function sp_cardUnSelected(player) {
-        var msg = '{"player":'+player+',"mType":"CardUndrawn"}';
-        console.log("out> "+msg);
-        location.hash = "";
-        sp_send(msg);
-    }
-
-	// server to client methods
-
-    /*
-    Invoked when player enter or leave the room
-    Should be used to give a visual indication of the joining or leaving of players
-    */
-    function sp_roomSize(size) {
-        console.log('sp_recievedRoomSize:'+size);
-        window.document.title = 'Planning Poker '+size+' players';
-        showRoomSize(size);
-    }
-
-    /*
-    Invoked when the number of cards been drawn by players changes
-    Should be used to give a visual indication of card on the table face down
-    */
-    function sp_drawnSize(size) {
-        console.log('sp_recievedDrawnSize:'+size);
-        showDrawnSize(size);
-    }
+/*
+Invoked when the number of cards been drawn by players changes
+Should be used to give a visual indication of card on the table face down
+*/
+function sp_drawnSize(size) {
+    console.log('sp_recievedDrawnSize:'+size);
+    showDrawnSize(size);
+}
     
-    /*
-    Invoked when the "CardSet" message arrives when all the cards are to be revealed.
-    Should render all of the cards to end this round of the game.
-    */
-    function sp_recievedCardSet(cards) {
-        console.log('sp_showCards:'+JSON.stringify(cards));
-        var chosen = []
-        cards.forEach(function(cardDrawn) {
-            chosen.push(cardDrawn.card)
-        });
-        showDrawnCards(chosen)
-    }
-
+/*
+Invoked when the "CardSet" message arrives when all the cards are to be revealed.
+Should render all of the cards to end this round of the game.
+*/
+function sp_recievedCardSet(cards) {
+    console.log('sp_showCards:'+JSON.stringify(cards));
+    var chosen = []
+    cards.forEach(function(cardDrawn) {
+        chosen.push(cardDrawn.card)
+    });
+    showDrawnCards(chosen)
+}
 	</script>
 	<script>
 // game oCanvas skin

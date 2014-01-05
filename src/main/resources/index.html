@@ -1,17 +1,10 @@
 <html>
-<head><title>Planning Poker</title>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="jquery.gracefulWebSocket.js"></script>
-</head>
+<head><title>Planning Poker</title></head>
 <body>
-<script type="text/javascript">
-var socket = $.gracefulWebSocket("ws://echo.websocket.org");
-socket.close()
-</script>
 <h1>Planning Poker</h1>
 <form onsubmit="return false;">
   Input any room identifier: <input type="text" name="message" value=""/>
-  <input type="button" value="Enter" onclick="window.location = '/register/redirect?skin=poker.html&room='+this.form.message.value+'&fallback='+window.wsFallback" />
+  <input type="button" value="Enter" onclick="window.location = '/register/redirect?skin=poker.html&room='+this.form.message.value" />
 </form>
 </body>
 </html>

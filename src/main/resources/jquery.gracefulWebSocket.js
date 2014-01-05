@@ -135,7 +135,6 @@ window.wsFallback = false;
 				 * @param {Object} data
 				 */
 				function pollSuccess(data) {
-					
 					// trigger onmessage
 					var messageEvent = {"data" : data};
 					fws.onmessage(messageEvent);	
@@ -169,9 +168,16 @@ window.wsFallback = false;
 				return fws;
 			}
 			
-			// create a new websocket or fallback
-			var ws = window.WebSocket ? new WebSocket(url) : new FallbackSocket();
-			//var ws = new FallbackSocket();
+			var ws = null;
+			
+			if( typeof(window.forceWsFallback) != "undefined" && window.forceWsFallback == true ) {
+				console.log('forcing wsFallback');
+				ws = new FallbackSocket();
+			} else {
+				ws = window.WebSocket ? new WebSocket(url) : new FallbackSocket();
+				console.log('using wsFallback:'+window.wsFallback);
+			}
+			
 			$(window).unload(function () { ws.close(); ws = null });
 			return ws;
 		}

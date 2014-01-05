@@ -28,7 +28,7 @@ package object server {
 	akka {
 	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
       event-handler-startup-timeout = 60s
-	  loglevel=DEBUG
+	  loglevel=INFO
 	  actor {
 	    deployment {
 	      /static-file-router {
