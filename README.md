@@ -23,32 +23,34 @@ Running from a local build:
 sbt run
 ```
 
-Create a runnable jar to deploy and start it (see .openshift/action_hooks/*)
+Create a runnable jar to deploy and start it with
 
 ```sh
 sbt assembly
-java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 8080 8000 80
+java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 80
 ```
 
-You should see the output 
+N.B. You would need to sudo the command to run on port 80 on Mac OSX or other secure system (see .openshift/action_hooks/* for RHEL scripts). 
+
+You should see the output: 
 
 ```
 Serving web content out of src/main/resources
-Open a few browsers and navigate to http://localhost:8080. Start playing!
+Open a few browsers and navigate to http://localhost:80. Start playing!
 ```
 
 You can now go to that local url and play. 
 
 Press ```Ctrl+c``` to kill the process which stops the server. 
 
-The three arguments are:
+The process takes two mandatory and two optional arguments:
 
 1. IP/interface to bind to
 2. Port to serve static content
 3. Websocket alternative port (defaults to static content port)
 4. Graceful websocket polling port (defaults to static content port)
 
-In the example above to run on the Redhat Openshift Cloud you use "8080 8000 80". This binding the server to port 8080 which is mapped to from port 80. If the browser does not support websockets they will be told to poll port 80. If the browser does support websockets it is old to connect to port 8000. A simple server installation could just specify "80 80 80" to run all services on the main web port.   
+The .openshift/action_hooks/README.md explains the optional parameters. 
 
 ## Creating A Skin
 
