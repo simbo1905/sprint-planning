@@ -1,6 +1,6 @@
 # Planning Poker
 
-A lightweight implementation of Planning Poker / Scrum Poker using JavaScript and Websockets with the serverside implimented with Akka/Socko. 
+A lightweight implementation of a Planning Poker (aka Scrum Poker) web application. The browser code uses HTML5 [websockets](https://http://www.websocket.org/) when they are detected in the browser else does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX in legacy browsers. The server is a single jar file which runs on a standard Java JVM. The server logic is written in Scala using the Akka framework for concurrency and event driven programming. The networking layer is Netty 4 using the awesome [Socko](https://github.com/mashupbots/socko) server. The code come with build and launch scripts to run on the Redhat Openshift PaaS cloud.  
 
 ## Build Prerequisites
 
