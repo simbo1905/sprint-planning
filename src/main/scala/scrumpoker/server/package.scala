@@ -26,9 +26,8 @@ package object server {
 	  executor=thread-pool-executor
 	}
 	akka {
-	  event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
-      event-handler-startup-timeout = 60s
-	  loglevel=INFO
+    loggers = ["akka.event.slf4j.Slf4jLogger"]
+    loglevel = "INFO"
 	  actor {
 	    deployment {
 	      /static-file-router {

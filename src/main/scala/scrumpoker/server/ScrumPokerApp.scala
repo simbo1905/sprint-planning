@@ -49,6 +49,7 @@ import scrumpoker.game.Polling
 import scrumpoker.game.Registration
 import scrumpoker.game.Close
 import scrumpoker.game.Close
+import org.mashupbots.socko.webserver.WebLogConfig
 
 // TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
@@ -194,7 +195,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       case unknown => log.warn(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })
 
-    val webServer: WebServer = new WebServer(WebServerConfig(hostname = interface, port = bindPort), routes, actorSystem)
+    val webServer: WebServer = new WebServer(WebServerConfig(hostname = interface, port = bindPort, webLog = Some(WebLogConfig())), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run {
         webServer.stop()
