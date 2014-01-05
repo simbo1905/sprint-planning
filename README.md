@@ -65,13 +65,13 @@ shows that a player had hit the reveal cards button which sent a message of type
 
 The complete set of messages are defined in the file ```/planning-poker/src/main/scala/scrumpoker/game/Messages.scala```
 
-- RoomSize: Sent to all browsers when a player enters the room. Should be used to give a visual indicatation that more players have joined the room. Also sent to all browsers in response to a reset message. 
-- DrawnSize: Sent to all browsers when a player selects a card. Should be used to indicte how many players in the room have selected a card. A message is also sent to all browsers in response to a reset eessage to show zero cards drawn. 
+- RoomSize: Sent to all browsers when a player enters the room. Should be used to give a visual indication that more players have joined the room. Also sent to all browsers in response to a reset message. 
+- DrawnSize: Sent to all browsers when a player selects a card. Should be used to indicate how many players in the room have selected a card. A message is also sent to all browsers in response to a reset message to show zero cards drawn. 
 - CardSet: Sent to all browsers when the cards are revealed in response to a Reveal message. Contains the complete state of the game as the list of CardDrawn messages sent by all the players. 
 - CardDrawn: Sent from the browser when a player selects a card.
 - CardUndrawn: Sent from the browser when a player unselects the card they had selected. 
 - PlayerExit: Sent from the browser to the server when the browser window is closed. 
-- Reveal: Sent from the brower to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
+- Reveal: Sent from the browser to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
 - Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize message and DrawnSize zero message being sent to all browsers to cause the game state to be cleared. 
 
 License
@@ -83,5 +83,4 @@ TODO
 ----
 
 [] Compress the static resources
-	
-
+[] Check the alternate websocket port is reachable and fallback to polling if not
