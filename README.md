@@ -23,7 +23,7 @@ Running from a local build:
 sbt run
 ```
 
-Create a runnable jar to deploy and starting it on a server (see .openshift/action_hooks/*)
+Create a runnable jar to deploy and start it (see .openshift/action_hooks/*)
 
 ```sh
 sbt assembly
