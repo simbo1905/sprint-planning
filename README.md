@@ -82,8 +82,8 @@ Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 TODO
 ----
 
-[] Compress the static resources
-[] If the room timesout check that all the polling players are shutdown
-[] Move all logging including websocket activity to the socko logs with writeWebLog() 
+[] Compress the static resources <br/>
+[] If the room timesout check that all the polling players are shutdown  <br/>
+[] Move all logging including websocket activity to the socko logs with writeWebLog() <br/>
 
 End.
