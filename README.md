@@ -23,7 +23,7 @@ Running from a local build:
 sbt run
 ```
 
-Create a runnable jar to deploy and start it with
+Create a runnable jar to deploy and then start it with:
 
 ```sh
 sbt assembly
