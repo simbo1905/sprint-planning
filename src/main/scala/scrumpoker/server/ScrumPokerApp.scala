@@ -167,6 +167,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
 
         /**
          *  Send registering players to the main page encoding the room and their player id
+         *  Firefox and android2.3.3 seem to cache a redirect so trying 303 response rather than 302
          */
         case GET(PathSegments("register" :: "redirect" :: Nil)) =>
           val player = nextId()
@@ -174,7 +175,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
           val url = s"/${page}?room=${room}&player=${player}"
           httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, url)
-          httpRequest.response.write(HttpResponseStatus.SEE_OTHER) // firefox and android2.3.3 seem to cache a redirect
+          httpRequest.response.write(HttpResponseStatus.SEE_OTHER)
 
         /**
          * Openshift currently requires the use of a high port for websockets so we need the browser to check that this is reachable if behind a corporate firewall
