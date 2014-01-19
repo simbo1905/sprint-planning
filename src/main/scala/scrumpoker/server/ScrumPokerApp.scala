@@ -50,6 +50,7 @@ import scrumpoker.game.Registration
 import scrumpoker.game.Close
 import scrumpoker.game.Close
 import org.mashupbots.socko.webserver.WebLogConfig
+import io.netty.handler.codec.http.HttpHeaders
 
 // TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
@@ -171,7 +172,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           val player = nextId()
           val page = httpRequest.endPoint.getQueryString("skin").getOrElse("poker.html")
           val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
-          httpRequest.response.redirect(s"/${page}?room=${room}&player=${player}")
+          val url = s"/${page}?room=${room}&player=${player}"
+          httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, url)
+          httpRequest.response.write(HttpResponseStatus.SEE_OTHER) // firefox and android2.3.3 seem to cache a redirect
 
         /**
          * Openshift currently requires the use of a high port for websockets so we need the browser to check that this is reachable if behind a corporate firewall
