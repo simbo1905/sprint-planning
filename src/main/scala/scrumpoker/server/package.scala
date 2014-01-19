@@ -1,14 +1,12 @@
 package scrumpoker
 
 import java.io.File
-
 import scala.concurrent.duration.DurationInt
 import scala.util.control.Exception.catching
 import scrumpoker.game.PollResponse
-
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
-
 import akka.util.Timeout
+import java.io.PrintWriter
 
 package object server {
   implicit class StringImprovements(val s: String) {
@@ -39,10 +37,11 @@ package object server {
 	}
   """
 
+  val tempFile = File.createTempFile("planning-poker", ".js")
   val contentPath = scala.util.Properties.envOrElse("SP_HTML_CONTENT_PATH", "src/main/resources")
   val contentDir = new File(contentPath);
   val staticContentHandlerConfig = StaticContentHandlerConfig(
-    rootFilePaths = Seq(contentDir.getAbsolutePath))
+    rootFilePaths = Seq(contentDir.getAbsolutePath, tempFile.getParentFile.getAbsolutePath))
 
   implicit val timeout = Timeout(1 seconds)
 
@@ -56,5 +55,17 @@ package object server {
 
   def closeJson() = {
     "{\"mType\":\"close\",  \"ts\":\"" + new java.util.Date().toString + "\"}"
+  }
+
+  /**
+   * The browser needs to know about any alternate ports which the server may have been told to use
+   * Here we write out a temporary script file which the browser will load to process the port info.
+   * We use a temporary file as socko will gzip the payload and sent 304 headers to cause minimise the traffic.
+   */
+  def createProcessInfoTempFile(websocketPort: Int, fallbackPort: Int) = {
+    val content = s"var websocketPort = ${websocketPort}; var fallbackPort = ${fallbackPort}; // should cache\n"
+    tempFile.deleteOnExit()
+    Some(new PrintWriter(tempFile)).foreach { p => p.write(content); p.close }
+    tempFile
   }
 }

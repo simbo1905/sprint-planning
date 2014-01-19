@@ -71,6 +71,8 @@ object ScrumGameApp extends Logger with SnowflakeIds {
     val websocketPort = commandLineMap.getOrElse(2, bindPort.toString).toInt
     val fallbackPort = commandLineMap.getOrElse(3, bindPort.toString).toInt
 
+    val processInfoTempFile = createProcessInfoTempFile(websocketPort, fallbackPort)
+
     def scrumGame = actorSystem.actorSelection("/user/scrumGame")
 
     val routes = Routes({
@@ -181,7 +183,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
          * Openshift currently requires the use of a high port for websockets so we need the browser to check that this is reachable if behind a corporate firewall
          */
         case GET(PathSegments("websocket" :: "ports" :: Nil)) =>
-          httpRequest.response.write(s"var websocketPort = ${websocketPort}; var fallbackPort = ${fallbackPort};")
+          staticContentHandlerRouter ! new StaticFileRequest(httpRequest, processInfoTempFile)
 
         /**
          * Server static content out of contentDir defaulting to index.html and giving a 404 for favicon.ico
