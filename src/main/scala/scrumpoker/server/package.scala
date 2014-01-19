@@ -58,9 +58,9 @@ package object server {
   }
 
   /**
-   * The browser needs to know about any alternate ports which the server may have been told to use
+   * The browser needs to know about any alternate ports which the server may have been told to use.
    * Here we write out a temporary script file which the browser will load to process the port info.
-   * We use a temporary file as socko will gzip the payload and sent 304 headers to cause minimise the traffic.
+   * We use file to take advantages of gzip and 304 behaviour of the socko StaticContentHandler.
    */
   def createProcessInfoTempFile(websocketPort: Int, fallbackPort: Int) = {
     val content = s"var websocketPort = ${websocketPort}; var fallbackPort = ${fallbackPort}; // should cache\n"
