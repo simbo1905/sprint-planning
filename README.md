@@ -17,20 +17,20 @@ sbt test
 
 ## Running
 
-Running from a local build:
+For local testing you can run the code from the build folder with:
 
 ```sh
 sbt run
 ```
 
-Create a runnable jar to deploy and then start it with:
+Create then launch a runnable jar for a server deployment with:
 
 ```sh
 sbt assembly
 java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 80
 ```
 
-N.B. You would need to sudo the command to run on port 80 on Mac OSX or other secure system (see .openshift/action_hooks/* for RHEL scripts). 
+N.B. You would need to sudo the command to run on port 80 on Mac OSX or Linux secure system (see .openshift/action_hooks/* for RHEL scripts). 
 
 You should see the output: 
 
@@ -50,9 +50,11 @@ The process takes two mandatory and two optional arguments:
 3. Websocket alternative port (defaults to static content port)
 4. Graceful websocket polling port (defaults to static content port)
 
-The .openshift/action_hooks/README.md explains the optional parameters. 
+The file .openshift/action_hooks/README.md explains the optional parameters. 
 
 ## Creating A Skin
+
+The 
 
 The site is effectively two pages under ```src/main/resources``` which are ```index.html``` and ```poker.html```. The messages sent and received from the server show up on the browsers javascript console (e.g. firefox / chrome web developers console) as ```out>``` and ```in>``` entries which mean *out* from the browser to the server else *in* from the server to the browser, e.g. 
 
@@ -72,7 +74,7 @@ The complete set of messages are defined in the file ```/planning-poker/src/main
 - CardUndrawn: Sent from the browser when a player unselects the card they had selected. 
 - PlayerExit: Sent from the browser to the server when the browser window is closed. 
 - Reveal: Sent from the browser to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
-- Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize message and DrawnSize zero message being sent to all browsers to cause the game state to be cleared. 
+- Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize and DrawnSize zero messages all being sent to all browsers to cause the game state to be cleared. 
 
 License
 ----
@@ -83,7 +85,7 @@ TODO
 ----
 
 [] Compress the static resources <br/>
-[] If the room timesout check that all the polling players are shutdown  <br/>
+[] If the room times-out check that all the polling players are shutdown  <br/>
 [] Move all logging including websocket activity to the socko logs with writeWebLog() <br/>
 
 End.

@@ -41,6 +41,9 @@ socket.onmessage = function(event) {
             case 'CardSet':
                 sp_recievedCardSet(msg.cards);
                 break;
+            case 'Reset': 
+            	sp_reset();
+            	break;
             case 'ts':
             	// timestamp heartbeat
             	break;
@@ -59,6 +62,7 @@ socket.onmessage = function(event) {
 */
 socket.onopen = function(event) {
     console.log("Web Socket opened");
+    window.websocketOpened = true;
     if( window.wsFallback ) {
     	// server doenst know about this player when faking websockets with ajax polling so we need to announce that we will be polling
     	console.log("sending handshake");
@@ -79,19 +83,14 @@ socket.onopen = function(event) {
 };
 
 /**
-* If the websocketPort is not the same as the fallbackPort then the websocket port may be firewalled on the client side. 
-* In which case the onclose will be called because a connection could never be established and we will fallback to ajax polling by reloading the page forcing the use of the fallback mechanism. 
-* If the websocket port is the same as the fallback port (i.e. its the content port) then we must have had a connection to be running this script. In which case the server has been restarted so we try to reload the page to restart the game. 
-* The worst case scenario is that everything was working, the websocketPort is not the same as the fallbackPort, and the server was restarted. In which case we fallback to polling which was not required for the next game. 
+* If the websocket was never seen to have opened then we assume it is firewalled or a proxy does not support websockets and we ask to fallback to ajax. 
 */
 socket.onclose = function(event) {
-    var fallback = null;
-    if( websocketPort != fallbackPort) {
+    var fallback = false;
+    if( ! window.websocketOpened ) {
+    	console.error("websocket onclose with no onopen so falling back");
     	fallback = true;
-    } else {
-    	fallback = false;
     }
     console.log("Web Socket closed reopening window with fallback:"+fallback);
-    
     window.location.assign(window.location.pathname+'?room='+room+'&player='+player+'&fallback='+fallback);
 };

@@ -42,6 +42,8 @@ if( typeof(fallback) != "undefined" && fallback == "true" ) {
 	window.forceWsFallback = false;
 }
 
+window.websocketOpened = false;
+
 console.log("player:"+player+",room:"+room+",selectedId:"+selectedId+",port:"+port+",fallback:"+fallback);
 	</script>
 	<script type="text/javascript" src="planning-poker-protocol.js"></script>
@@ -135,6 +137,13 @@ function sp_recievedCardSet(cards) {
         chosen.push(cardDrawn.card)
     });
     showDrawnCards(chosen)
+}
+
+/**
+Invoked when a reset has occurred. 
+*/
+function sp_reset() {
+	alert('reset has occured');
 }
 	</script>
 	<script>
