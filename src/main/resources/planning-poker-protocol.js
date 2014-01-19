@@ -48,7 +48,8 @@ socket.onmessage = function(event) {
             	// timestamp heartbeat
             	break;
             case 'close':
-            	if( ! window.wsFallback ) socket.close();
+		        socket.onclose = function () {}; // disable onclose handler first
+		        socket.close()
             	break;
             default:
                 console.log('unknown from server: '+event.data);
@@ -74,11 +75,8 @@ socket.onopen = function(event) {
         var msg = '{"player":'+player+',"mType":"PlayerExit"}';
         console.log("out> "+msg);
         sp_send(msg);
-        if( ! window.wsFallback ) {
-        	// only close when we have a real websocket to close not when ajax polling
-	        socket.onclose = function () {}; // disable onclose handler first
-	        socket.close()
-        }
+        socket.onclose = function () {}; // disable onclose handler first
+        socket.close()
     };        
 };
 
