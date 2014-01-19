@@ -143,7 +143,8 @@ function sp_recievedCardSet(cards) {
 Invoked when a reset has occurred. 
 */
 function sp_reset() {
-	alert('reset has occured');
+	// due to a bug in my simple skin rending i will refresh the page. should not necessary with a proper skin. 
+	window.location.assign(window.location);
 }
 	</script>
 	<script>
