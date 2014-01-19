@@ -141,7 +141,9 @@ object ScrumGameApp extends Logger with SnowflakeIds {
                         case r: PollResponse => httpRequest.response.write(r.toJson)
                         case x => log.error(s"unknown response $x")
                       }
-                      case Failure(failure) => httpRequest.response.write(errorJson(failure))
+                      case Failure(failure) =>
+                        log.info(s"polling failure for player:${player} in roomNumber:{roomNumber} with failure: ${failure.getMessage()}")
+                        httpRequest.response.write(closeJson)
                     }
                   }
                 } else {
