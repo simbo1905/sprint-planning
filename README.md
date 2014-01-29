@@ -1,6 +1,8 @@
 # Planning Poker
 
-A lightweight implementation of a Planning Poker (aka Scrum Poker) web application. The browser code uses HTML5 [websockets](http://www.websocket.org/) when they are detected else does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX in legacy browsers. The server is a single jar file which runs on a standard Java JVM. The server logic is written in [Scala](http://www.scala-lang.org/) using the core [Akka](http://akka.io/) libraries for concurrency and [reactive programming](http://www.reactivemanifesto.org/). The networking layer is [Netty 4](https://github.com/netty/netty) using the awesome [Socko](https://github.com/mashupbots/socko) server. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud.  
+A lightweight implementation of a Planning Poker (aka Scrum Poker) web application. The browser code uses HTML5 [websockets](http://www.websocket.org/) when they are detected else does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX in legacy browsers. The server is a single jar file which runs on a standard Java JVM. The server logic is written in [Scala](http://www.scala-lang.org/) using the core [Akka](http://akka.io/) libraries for concurrency and [reactive programming](http://www.reactivemanifesto.org/). The networking layer is [Netty 4](https://github.com/netty/netty) using the awesome [Socko](https://github.com/mashupbots/socko) server. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud.
+
+A beta version is now running over on amazon webservices at http://www.planning-poker.info/ with a new pretty skin coming soon.   
 
 ## Build Prerequisites
 
@@ -85,6 +87,6 @@ TODO
 ----
 
 [] If the room times-out check that all the polling players are shutdown  <br/>
-[] Move all logging including websocket activity to the socko logs with writeWebLog() <br/>
+[] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
 
 End.
