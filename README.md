@@ -56,8 +56,6 @@ The file .openshift/action_hooks/README.md explains the optional parameters.
 
 ## Creating A Skin
 
-The 
-
 The site is effectively two pages under ```src/main/resources``` which are ```index.html``` and ```poker.html```. The messages sent and received from the server show up on the browsers javascript console (e.g. firefox / chrome web developers console) as ```out>``` and ```in>``` entries which mean *out* from the browser to the server else *in* from the server to the browser, e.g. 
 
 ```sh
