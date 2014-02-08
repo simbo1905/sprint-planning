@@ -6,7 +6,7 @@ The browser code uses HTML5 [websockets](http://www.websocket.org/). The server 
 
 When the browser does not support websockets or if a websocket cannot be opened do to proxy issues the browser code does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX polling. 
 
-The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud.
+The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud in the .openshift folder. Liunx management scripts which work on Amazon Web Services are in the aws folder. 
 
 A beta version is now running over on amazon webservices at http://www.planning-poker.info/ with a new pretty skin coming soon...   
 
