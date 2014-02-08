@@ -197,7 +197,10 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         case GET(PathSegments(fileName :: Nil)) =>
           staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, fileName))
 
-        case unknown => log.error(s"could not match $httpRequest contained in $r")
+        case unknown =>
+          log.debug(s"could not match $httpRequest contained in $r")
+          httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, "/index.html")
+          httpRequest.response.write(HttpResponseStatus.MOVED_PERMANENTLY)
       }
 
       case unknown => log.warn(s"could not match ${unknown.getClass().getName()} = ${unknown}")
