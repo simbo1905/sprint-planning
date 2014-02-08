@@ -3,8 +3,11 @@ package scrumpoker.server
 import org.mashupbots.socko.infrastructure.Logger
 
 /**
- * Twitter's algorithm for generating unique tweet Ids within a cluster that approximately sort on time
- * https://github.com/twitter/snowflake/
+ * Twitter's algorithm for generating unique tweet Ids which approximately sort on time across a cluster where the locks may be out of sync
+ *
+ * Use the system properties CLUSTER_WORKER_ID and CLUSTER_DATACENTRE_ID to configure the jvm to generate unique values in the cluster
+ *
+ * Taken from https://github.com/twitter/snowflake/ which is licensed under the Apache License Version 2.0
  */
 trait SnowflakeIds extends Logger {
   private[this] var lastTimestamp = -1L
