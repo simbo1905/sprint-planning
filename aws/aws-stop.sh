@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# You need to sudo as the server needed to be started as root to run on port 80
 # The logic to stop your application should be put in this script.
 if [ -z "$(ps -ef | grep 'planning-poker-runnable.jar' | grep -v grep)" ]
 then
