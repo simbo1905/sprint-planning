@@ -1,6 +1,6 @@
-# Planning Poker
+# Sprint Planning
 
-A lightweight implementation of a Planning Poker (aka Scrum Poker) web application. 
+A lightweight implementation of a Sprint Planning (aka Scrum Poker) web application. 
 
 The browser code uses HTML5 [websockets](http://www.websocket.org/). The server logic is written in [Scala](http://www.scala-lang.org/) using the core [Akka](http://akka.io/) libraries for concurrency and [reactive programming](http://www.reactivemanifesto.org/). The networking layer is [Netty 4](https://github.com/netty/netty) with HTTP routing provided by the awesome [Socko](https://github.com/mashupbots/socko) server. 
 
@@ -8,18 +8,16 @@ When the browser does not support websockets or if a websocket cannot be opened 
 
 The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud in the .openshift folder. Liunx management scripts which work on Amazon Web Services are in the aws folder. 
 
-A beta version is now running over on amazon webservices at http://www.planning-poker.info/ with a new pretty skin coming soon...   
-
 ## Build Prerequisites
 
-  - Java Platform (JDK 7+) http://www.oracle.com/technetwork/java/javase/downloads/index.html
+  - Java Platform (JDK 6+) http://www.oracle.com/technetwork/java/javase/downloads/index.html
   - SBT http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html#installing-sbt
 
 ## Building
 
 ```sh
-git clone https://github.com/simbo1905/planning-poker.git planning-poker
-cd planning-poker
+git clone https://github.com/simbo1905/sprint-planning.git
+cd sprint-planning
 sbt test
 ```
 
@@ -38,7 +36,7 @@ sbt assembly
 java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 80
 ```
 
-N.B. You would need to sudo the command to run on port 80 on Mac OSX or Linux secure system (see .openshift/action_hooks/* for RHEL scripts). 
+N.B. You would need to use sudo to run the command as root to bind the server to port 80 on Mac OSX or Linux (see the "aws" scripts folder for example linux scripts). 
 
 You should see the output: 
 
@@ -90,7 +88,8 @@ Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 TODO
 ----
 
-[] If the room times-out check that all the polling players are shutdown  <br/>
+[] If the room times-out ensure that all the polling players are shutdown  <br/>
+[] If the room times-out ensure that all the open websockets are closed  <br/>
 [] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
 
 End.
