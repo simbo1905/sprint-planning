@@ -88,6 +88,7 @@ Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 TODO
 ----
 
+[] Remove all references to the trade mark "planning poker"
 [] If the room times-out ensure that all the polling players are shutdown  <br/>
 [] If the room times-out ensure that all the open websockets are closed  <br/>
 [] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
