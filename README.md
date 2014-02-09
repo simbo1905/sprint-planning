@@ -8,6 +8,8 @@ When the browser does not support websockets or if a websocket cannot be opened 
 
 The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud in the .openshift folder. Liunx management scripts which work on Amazon Web Services are in the aws folder. 
 
+There is a beta version running at http://sprintplanningqa-simbo1905.rhcloud.com/
+
 ## Build Prerequisites
 
   - Java Platform (JDK 6+) http://www.oracle.com/technetwork/java/javase/downloads/index.html
