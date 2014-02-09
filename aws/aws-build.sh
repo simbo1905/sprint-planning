@@ -4,7 +4,7 @@ SBT_PATH=$HOME/sbt
 SBT_DIR=$HOME/.sbt
 IVY_DIR=$HOME/.ivy
 
-cd $HOME/sprint-planning
+cd $SPRINT_PLANNING_HOME
 
 SBT_OPTS="-XX:MaxPermSize=256m -Xmx768m"
 
