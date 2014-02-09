@@ -1,4 +1,4 @@
-name := """planning-poker"""
+name := """sprint-planning"""
 
 version := "0.4"
 

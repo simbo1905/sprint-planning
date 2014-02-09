@@ -37,7 +37,7 @@ package object server {
 	}
   """
 
-  val tempFile = File.createTempFile("planning-poker", ".js")
+  val tempFile = File.createTempFile("sprint-planning", ".js")
   val contentPath = scala.util.Properties.envOrElse("SP_HTML_CONTENT_PATH", "src/main/resources")
   val contentDir = new File(contentPath);
   val staticContentHandlerConfig = StaticContentHandlerConfig(

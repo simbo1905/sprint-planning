@@ -2,7 +2,7 @@ import AssemblyKeys._
 
 assemblySettings
 
-jarName in assembly := "planning-poker-runnable.jar"
+jarName in assembly := "sprint-planning-runnable.jar"
 
 test in assembly := {}
 

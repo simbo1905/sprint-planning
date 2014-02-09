@@ -33,7 +33,7 @@ Create then launch a runnable jar for a server deployment with:
 
 ```sh
 sbt assembly
-java -jar ./target/scala-2.10/planning-poker-runnable.jar 127.0.0.1 80
+java -jar ./target/scala-2.10/sprint-planning-runnable.jar 127.0.0.1 80
 ```
 
 N.B. You would need to use sudo to run the command as root to bind the server to port 80 on Mac OSX or Linux (see the "aws" scripts folder for example linux scripts). 
@@ -69,7 +69,7 @@ in>  {"cards":[{"player":"417007700350734336","card":13,"mType":"CardDrawn"},{"p
 
 shows that a player had hit the reveal cards button which sent a message of type "Reveal" to the server. The server responded with a message of type "CardSet" which contained two "CardDrawn" entries for two players which had values "8" and "13". 
 
-The complete set of messages are defined in the file ```/planning-poker/src/main/scala/scrumpoker/game/Messages.scala```
+The complete set of messages are defined in the file ```/sprint-planning/src/main/scala/scrumpoker/game/Messages.scala```
 
 - RoomSize: Sent to all browsers when a player enters the room. Should be used to give a visual indication that more players have joined the room. Also sent to all browsers in response to a reset message. 
 - DrawnSize: Sent to all browsers when a player selects a card. Should be used to indicate how many players in the room have selected a card. A message is also sent to all browsers in response to a reset message to show zero cards drawn. 

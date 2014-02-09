@@ -4,7 +4,7 @@ SBT_PATH=$HOME/sbt
 SBT_DIR=$HOME/.sbt
 IVY_DIR=$HOME/.ivy
 
-cd $HOME/planning-poker
+cd $HOME/sprint-planning
 
 SBT_OPTS="-XX:MaxPermSize=256m -Xmx768m"
 

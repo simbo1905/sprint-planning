@@ -1,6 +1,6 @@
 #!/bin/bash
-test -d "$HOME/planning-poker" || mkdir "$HOME/planning-poker"
-cd $HOME/planning-poker
+test -d "$HOME/sprint-planning" || mkdir "$HOME/sprint-planning"
+cd $HOME/sprint-planning
 git checkout -- ./src/main/resources/index.html
 git pull origin master
 DATETIME=`date +"%y%m%d%H%M"`

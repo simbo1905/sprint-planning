@@ -2,19 +2,19 @@
 # Running the code on Redhat OpenShift cloud
 
 ```sh
-rhc app create -a planningpoker -t diy 
-cd planningpoker/
-git remote add upstream https://github.com/simbo1905/planning-poker.git
+rhc app create -a sprintplanning -t diy 
+cd sprintplanning/
+git remote add upstream https://github.com/simbo1905/sprint-planning.git
 git pull -s recursive -X theirs upstream master
 sbt test
 git push
-rhc tail planningpoker -f ./diy/logs/server.log -o '-n100'
+rhc tail sprintplanning -f ./diy/logs/server.log -o '-n100'
 ```
 
 To see the url of the running app (also a link in the openshift web console)
 
 ```sh
-rhc app show --app planningpoker
+rhc app show --app sprintplanning
 ```
 
 ## Dude, what's with all the ports? 

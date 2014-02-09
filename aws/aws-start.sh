@@ -1,5 +1,5 @@
 #!/bin/bash
 # You need to sudo to start the server on port 80
-cd $HOME/planning-poker
-nohup java -jar $HOME/planning-poker/target/scala-2.10/planning-poker-runnable.jar 0.0.0.0 80 < /dev/null > $HOME/planning-poker/server.log &
+cd $HOME/sprint-planning
+nohup java -jar $HOME/sprint-planning/target/scala-2.10/sprint-planning-runnable.jar 0.0.0.0 80 < /dev/null > $HOME/sprint-planning/server.log &
 
