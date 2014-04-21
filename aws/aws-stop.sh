@@ -6,5 +6,5 @@ then
     echo "Application is already stopped"
 else
     echo "Stopping application"
-    kill `ps -ef | grep 'sprint-planning-runnable.jar' | grep -v grep | awk '{ print $2 }'` > /dev/null 2>&1
+    sudo kill `ps -ef | grep 'sprint-planning-runnable.jar' | grep -v grep | awk '{ print $2 }'` > /dev/null 2>&1
 fi
