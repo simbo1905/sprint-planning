@@ -123,7 +123,6 @@ object ScrumGameApp extends Logger with SnowflakeIds {
           player.toLongOpt match {
             case None => log.warn(s"$player is not a long in post of $httpRequest")
             case Some(playerId) =>
-              val decoder = new HttpPostRequestDecoder(HttpDataFactory.value, httpRequest.nettyHttpRequest)
               if (httpRequest.nettyHttpRequest.isInstanceOf[HttpContent]) {
                 val content = httpRequest.nettyHttpRequest.asInstanceOf[HttpContent].content()
                 if (content.isReadable) {
