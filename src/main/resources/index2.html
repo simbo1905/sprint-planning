@@ -1,0 +1,15 @@
+<html>
+<head><title>Planning Poker</title></head>
+<body>
+<h1>Planning Poker</h1>
+This is a simple planning poker app for teams to do agile estimation over a phone conference. Simply invent your own unique room number below to use this tool with no registration required.  
+<form onsubmit="return false;">
+  Input any room identifier: <input type="text" name="message" value=""/>
+  <input type="button" value="Enter" onclick="window.location = '/register/redirect?skin='+this.form.skin.value+'&room='+this.form.message.value" />
+  skin: <select name="skin">
+  <option value="poker.html">poker</option>
+  <option value="poker2.html">poker2</option>
+  </select>
+</form>
+Version: 1402092046</body>
+</html>

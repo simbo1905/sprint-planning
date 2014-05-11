@@ -1,15 +1,385 @@
+<!DOCTYPE html>
 <html>
-<head><title>Planning Poker</title></head>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Sprint Planning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style type="text/css" media="screen, projection">
+.section:after,
+ul.nav:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+/* http://meyerweb.com/eric/tools/css/reset/ */
+/* v1.0 | 20080212 */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td { margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent; }
+body { line-height:1; }
+ol,ul { list-style:none; }
+blockquote,q { quotes:none; }
+blockquote:before,blockquote:after,q:before,q:after { content:'';content:none; }
+ins { text-decoration:none; }
+del { text-decoration:line-through; }
+table { border-collapse:collapse;border-spacing:0; }
+
+body {
+	font: normal 100% Cambria, Georgia, serif;
+	-moz-text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+	-webkit-text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+	-webkit-text-size-adjust: none;
+}
+a {
+	color: #0053a9; // #ff41d5
+	text-decoration: none;
+	-moz-transition: 0.2s color linear;
+	-webkit-transition: 0.2s color linear;
+	transition: 0.2s color linear;
+}
+a:hover {
+	color: #ff41d5;
+}
+#page {
+	padding: 2em 0;
+}
+.inner {
+	margin: 0 auto;
+	width: 93.75%;		/* 960px / 1024px */
+}
+img {
+	max-width: 100%;
+}
+.amp {
+	font-family: Baskerville, Garamond, Palatino, "Palatino Linotype", "Hoefler Text", "Times New Roman", serif;
+	font-style: italic;
+	font-weight: normal;
+}
+.mast {
+	float: left;
+	width: 31.875%;	/* 306px / 960px */
+}
+h1 {
+}
+h1 a {
+	padding-top: 117px;
+	height: 162px;
+	display: block;
+	text-align: center;
+}
+.intro,
+.main,
+.footer {
+	float: right;
+	width: 65.9375%;	/* 633px / 960px */
+}
+.intro {
+	margin-top: 117px;
+}
+.intro div {
+	line-height: 1.4;
+}
+ul.nav {
+	border-top: 1px solid #888583;
+	margin: 2em auto 0;
+	width: 64.379%;
+}
+ul.nav a {
+	font: bold 14px/1.2 "Book Antiqua", "Palatino Linotype", Georgia, serif;
+	display: block;
+	text-align: center;
+	letter-spacing: 0.1em;
+	padding: 1em 0.5em 3em;
+	margin-bottom: -1em;
+	text-transform: uppercase;
+}
+ul.nav a:hover {
+	background-position: 50% 100%;
+}
+li.first a {
+	border-top: 1px solid #FFF9EF;
+	padding-top: 1.25em;
+}
+ul.nav i {
+	font: normal 10px Baskerville, Garamond, Palatino, "Palatino Linotype", "Hoefler Text", "Times New Roman", serif;
+	display: block;
+	letter-spacing: 0.05em;
+}
+.intro h2 {
+	font: normal 2em "Hoefler Text", "Baskerville old face", Garamond, "Times New Roman", serif;
+	text-align: center;
+	margin-bottom: 0.25em;
+}
+.main h2 {
+	font-size: 1.4em;
+	text-transform: lowercase;
+	text-align: center;
+	margin: 0.75em 0 1em;
+}
+.main h2 b {
+	font-weight: normal;
+	padding: 0 1em;
+}
+.figure {
+	float: left;
+	font-size: 10px;
+	line-height: 1.1;
+	margin: 0 3.317535545023696682% 1.5em 0;			/* 21px / 633px */
+	text-align: center;
+	width: 31.121642969984202211%;				/* 197px / 633px */
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.figure b {
+	display: block;
+	font-size: 14px;
+	font-family: "Book Antiqua", "Palatino Linotype", Georgia, serif;
+	letter-spacing: 0.1em;
+}
+.figure img {
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	-webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	-moz-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);;
+	display: block;
+	margin: 0 auto 1em;
+}
+li#f-mycroft,
+li#f-winter {
+	margin-right: 0;
+}
+.footer {
+	font-size: 12px;
+	text-align: center;
+	padding: 40px 0 20px;
+}
+.footer p {
+	margin-bottom: 0.5em;
+}
+@media (max-width: 600px) {
+	.inner {
+		position: relative;
+	}
+	.mast,
+	.intro,
+	.main,
+	.footer {
+		float: none;
+		width: auto;
+	}
+	h1 {
+		background: none;
+	}
+	h1 a {
+		padding-top: 70px;
+		height: 87px;
+	}
+	ul.nav {
+		border-top: none;
+		margin: 0 auto;
+		position: absolute;
+		top: 0;
+		width: 100%;
+	}
+	ul.nav li {
+		float: left;
+		margin-right: 3.30%;
+		width: 31.12%;
+	}
+	ul.nav a,
+	ul.nav i {
+		font: 10px Helvetica, Arial, sans-serif;
+		letter-spacing: 0;
+	}
+	ul.nav a:hover,
+	ul.nav a:focus {
+		background-position: 0 100%;
+	}
+	li.first a {
+		border-top: none;
+		padding-top: 1em;
+	}
+	ul.nav li.last {
+		margin-right: 0;
+	}
+	.intro {
+		margin-top: 0;
+	}
+	.intro h2 {
+		font-size: 1.4em;
+	}
+	input.intext {
+	border-style: solid;
+border-width: 1px;
+border-color: black;
+font-family: helvetica, arial, sans serif;
+padding-left: 0px;
+	}
+}
+@media (max-width: 400px) {
+	.figure,
+	li#f-mycroft {
+		margin-right: 3.32%;
+		width: 48.34%;
+	}
+	li#f-watson,
+	li#f-moriarty {
+		margin-right: 0;
+	}
+}
+@media (min-width: 1300px) {
+	.mast {
+		float: none;
+		width: auto;
+	}
+	h1 {
+		float: left;
+		width: 31.88%;	
+	}
+	ul.nav {
+		float: right;
+		margin: 40px 0 1em;
+		text-align: center;
+		width: 65.94%;
+	}
+	ul.nav {
+		border-top: none;
+	}
+	ul.nav li.first a {
+		border-top: none;
+		padding-top: 1em;
+	}
+	ul.nav li {
+		float: left;
+		margin-right: 3.32%;
+		width: 31.12%;
+	}
+	ul.nav li.last {
+		margin-right: 0;
+	}
+	.intro {
+		margin-top: 1em;
+	}
+	.figure,
+	li#f-mycroft {
+		margin-right: 3.32%;
+		width: 13.90%;
+	}
+	.footer {
+		clear: both;
+		float: none;
+		margin-left: 56.77%;
+		width: 20.52%;
+	}
+}
+</style>
+</head>
 <body>
-<h1>Planning Poker</h1>
-This is a simple planning poker app for teams to do agile estimation over a phone conference. Simply invent your own unique room number below to use this tool with no registration required.  
+<div id="page">
+	<div class="inner">
+	
+		<div class="mast">
+			<h1 id="logo"><a href="#"><img id="sprint-planning-large.png" src="site/sprint-planning-large.png" alt="Sprint Planning" /></a></h1>
+			<ul class="nav">
+				<li><a href="#"><i>Page</i> One</a></li>
+				<li><a href="#"><i>Page</i> Two</a></li>
+				<li class="last"><a href="#"><i>About</i> Us</a></li>
+			</ul><!-- /end .nav -->
+		</div><!-- /end .mast -->
+	
+		<div class="section main">
+			<h2><b>Create Or Enter A Room</b></h2>
+			<p>
+				Create or access a sprint planning session by entering a memorable number or name into the input below:
+			</p>
+			<p/>
+			<p>
 <form onsubmit="return false;">
-  Input any room identifier: <input type="text" name="message" value=""/>
-  <input type="button" value="Enter" onclick="window.location = '/register/redirect?skin='+this.form.skin.value+'&room='+this.form.message.value" />
-  skin: <select name="skin">
-  <option value="poker.html">poker</option>
-  <option value="poker2.html">poker2</option>
-  </select>
+  <input type="text" name="message" value="" class="intext"/>
+  <input type="button" value="Enter" onclick="window.location = '/register/redirect?room='+this.form.message.value" />
 </form>
-Version: 1402092046</body>
+			</p>
+		</div>
+
+		<div class="footer">
+			<p>Code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
+			<p>Page layout by <a href="http://ethanmarcotte.com/">Ethan Marcotte</a> with tutorial <a href="http://alistapart.com/article/responsive-web-design">here</>.</p>
+		</div><!-- /end .footer -->
+	</div><!-- /end .inner -->
+</div><!-- /end #page -->
+
+<!--[if lte IE 7]><script type="text/javascript" src="site/imgSizer.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	imgSizer.collate();
+}
+</script><![endif]-->
+<!--[if lte IE 6]><script type="text/javascript" src="share/ddpng.js"></script>
+<script type="text/javascript">
+DD_belatedPNG.fix('body, #page, h1, h1 img, ul.nav, ul.nav a, .main h2, .main h2 b, .footer');
+</script><![endif]-->
+<script>
+//  Cameron Adams resize script from http://www.themaninblue.com/experiment/ResolutionLayout/
+
+function getBrowserWidth()
+{
+	if (window.innerWidth)
+	{
+		return window.innerWidth;
+	}
+	else if (document.documentElement && document.documentElement.clientWidth != 0)
+	{
+		return document.documentElement.clientWidth;
+	}
+	else if (document.body)
+	{
+		return document.body.clientWidth;
+	}
+	
+	return 0;
+};
+
+function attachEventListener(target, eventType, functionRef, capture)
+{
+    if (typeof target.addEventListener != "undefined")
+    {
+        target.addEventListener(eventType, functionRef, capture);
+    }
+    else if (typeof target.attachEvent != "undefined")
+    {
+        target.attachEvent("on" + eventType, functionRef);
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+};
+
+function windowSizeEffects()
+{
+	var theWidth = getBrowserWidth();
+
+	if( theWidth <= 600  ) 
+	{
+		document.getElementById("sprint-planning-large.png").src = "site/sprint-planning-web.png";
+	}
+	else 
+	{
+		document.getElementById("sprint-planning-large.png").src = "site/sprint-planning-large.png";
+	}
+
+	return true;
+}
+
+attachEventListener(window, "resize", windowSizeEffects, false);
+
+windowSizeEffects();
+</script>
+</body>
 </html>
