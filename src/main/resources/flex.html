@@ -4,40 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Sprint Planning</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="jquery.gracefulWebSocket.js"></script>
-<script type="text/javascript" src="/websocket/ports"></script>
-<script>
-// parse the address to learn room and player number
-
-var query = location.search.slice(1);
-var hash = (location.hash=="")? -1 : location.hash.slice(1);
-var result = {}, keyValuePairs = query.split('&');
-
-keyValuePairs.forEach(function(keyValuePair) {
-    keyValuePair = keyValuePair.split('=');
-    result[keyValuePair[0]] = keyValuePair[1] || '';
-});
-
-var player = result["player"];
-var room = result["room"];
-var fallback = result["fallback"];
-var selectedId = hash;
-
-var port = null;
-
-// a location with &fallback=true implies that there has been a websocket connection issue and we should force a fallback to AJAX
-if( typeof(fallback) != "undefined" && fallback == "true" ) {
-	port = fallbackPort;
-	window.forceWsFallback = true;
-} else {
-	port = websocketPort;
-	window.forceWsFallback = false;
-}
-
-console.log("player:"+player+",room:"+room+",selectedId:"+selectedId+",port:"+port+",fallback:"+fallback);
-</script>
-<script type="text/javascript" src="sprint-planning-protocol.js"></script>
 <style type="text/css" media="screen, projection">
 .section:after,
 ul.nav:after {
@@ -304,8 +270,11 @@ li#f-winter {
 	}
 }
 </style>
+
 </head>
-<body>
+
+<body onload="windowSizeEffects();">
+
 <div id="page">
 	<div class="inner">
 		<div class="mast">
@@ -319,9 +288,7 @@ li#f-winter {
 
 		<div class="section main" id="game-inputs">
 			<h2><b>Select Your Card</b></h2>
-			<!--
 				<img id="cards_img.5.png" src="site/cards_img.5.png" />
-			-->
 				<img id="cards_img1.png" src="site/cards_img1.png" />
 				<img id="cards_img3.png" src="site/cards_img3.png" />
 				<img id="cards_img5.png" src="site/cards_img5.png" />
@@ -331,21 +298,35 @@ li#f-winter {
 				<img id="cards_img34.png" src="site/cards_img34.png" />
 				<img id="cards_imgQ.png" src="site/cards_imgQ.png" />
 			</div>
+			
+			<script>
+			function doRoomSize() {
+				var size = document.getElementById("roomSize").value;
+				console.log("doRoomSize: "+size);
+				roomSize(size);
+			}
+			
+			function doCardsDrawn() {
+				var size = document.getElementById("drawnSize").value;
+				console.log("drawnSize: "+size);
+				drawnSize(size);
+			}
+			</script>
+			<input type="text" id="roomSize" name="roomSize"/>
+			<br/>
+			<button type="button" onclick="doRoomSize();">room size</button>
+			<br/>
+			<input type="text" id="drawnSize" name="drawnSize"/>
+			<br/>
+			<button type="button" onclick="doCardsDrawn();">drawn size</button>
+			
 			<div class="section main" id="game-outputs">
 			<h2><b>Current Selections</b></h2>
 		</div>
 
-		<div class="section main" id="game-buttons">
-			<img id="reveal_btn.png" src="site/reveal_btn.png"/>
-			&nbsp;&nbsp;
-			<img id="reset_btn.png" src="site/reset_btn.png"/>
-		</div>
-
 		<div class="footer">
-			<p>Cards by <a href="http://en.wikipedia.org/wiki/Template:Card">Colin M.L. Burnett</a>, 
-			code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
-			<p>Page layout by <a href="http://ethanmarcotte.com/">Ethan Marcotte</a> with tutorial 
-			<a href="http://alistapart.com/article/responsive-web-design">here</>.</p>
+			<p>Cards by <a href="http://en.wikipedia.org/wiki/Template:Card">Colin M.L. Burnett</a>, code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
+			<p>Page layout by <a href="http://ethanmarcotte.com/">Ethan Marcotte</a> with tutorial <a href="http://alistapart.com/article/responsive-web-design">here</>.</p>
 		</div><!-- /end .footer -->
 	</div><!-- /end .inner -->
 </div><!-- /end #page -->
@@ -363,7 +344,7 @@ DD_belatedPNG.fix('body, #page, h1, h1 img, ul.nav, ul.nav a, .main h2, .main h2
 <script>
 
 var blackImages = [ 
-//	"cards_img.5.png", 
+	"cards_img.5.png", 
 	"cards_img1.png", 
 	"cards_img3.png", 
 	"cards_img5.png", 
@@ -407,7 +388,7 @@ function windowSizeEffects()
 }
 
 var hoverImagesMap = { 
-//	"cards_img.5.png": "poker_img_hover.5.png", 
+	"cards_img.5.png": "poker_img_hover.5.png", 
 	"cards_img1.png": "poker_img_hover1.png", 
 	"cards_img3.png": "poker_img_hover3.png", 
 	"cards_img5.png": "poker_img_hover5.png", 
@@ -419,7 +400,7 @@ var hoverImagesMap = {
 };
 
 var selectedImagesMap = { 
-//	"cards_img.5.png": "poker_img_selected.5.png", 
+	"cards_img.5.png": "poker_img_selected.5.png", 
 	"cards_img1.png": "poker_img_selected1.png", 
 	"cards_img3.png": "poker_img_selected3.png", 
 	"cards_img5.png": "poker_img_selected5.png", 
@@ -428,30 +409,6 @@ var selectedImagesMap = {
 	"cards_img21.png": "poker_img_selected21.png", 
 	"cards_img34.png": "poker_img_selected34.png", 
 	"cards_imgQ.png": "poker_img_selectedQ.png"
-};
-
-var cardValuesMap = { 
-//	"cards_img.5.png": "0.5", 
-	"cards_img1.png": "1", 
-	"cards_img3.png": "3", 
-	"cards_img5.png": "5", 
-	"cards_img8.png": "8", 
-	"cards_img13.png": "13", 
-	"cards_img21.png": "21", 
-	"cards_img34.png": "34", 
-	"cards_imgQ.png": "-1"
-};
-
-var valueCardsMap = {
-//	"0.5": "poker_img_selected.5.png", 
-	"1": "poker_img_selected1.png", 
-	"3": "poker_img_selected3.png", 
-	"5": "poker_img_selected5.png", 
-	"8": "poker_img_selected8.png", 
-	"13": "poker_img_selected13.png", 
-	"21": "poker_img_selected21.png", 
-	"34": "poker_img_selected34.png", 
-	"-1": "poker_img_selectedQ.png"
 };
 
 function hoverCard(img) {
@@ -483,77 +440,17 @@ function cardClick() {
 		}
 		selectedCard = this;
 		pinkCard(this);
-		sp_sendCardSelection(player, cardValuesMap[this.id], cardValuesMap[this.id]);
 	} else {
 		selectedCard = null;
 		blackCard(this);
-		sp_cardUnSelected(player);
 	}
-}
-
-function sp_reset() {
-	if( null != selectedCard ) {
-		blackCard(selectedCard);
-	}	
-}
-
-var hoverButtonMap = {
-	"reset_btn.png": "reset_btn_hover.png", 
-	"reveal_btn.png": "reveal_btn_hover.png"
-};
-
-function hoverButton() {
-	this.src = "site/"+hoverButtonMap[this.id];
-}
-
-function unhoverButton() {
-	this.src = "site/"+this.id;
-}
-
-// client to server methods
-
-function sp_send(message) {
-  if (socket.readyState == 1 ) { // WebSocket.OPEN wont be defined in IE9 etc
-    socket.send(message);
-  } else {
-    console.error("The socket is not open.");
-  }
-}
-
-function resetClick() {
-    var r=confirm("Reset room?");
-	if (r==true) {
-        var msg = '{"mType":"Reset"}';
-        console.log("out> "+msg);
-        sp_send(msg);
-	}
-}
-
-function sp_sendCardSelection(player, cardNumber, cardId) {
-    var msg = '{"player":'+player+',"card":"'+cardNumber+'","mType":"CardDrawn"}';
-    console.log("out> "+msg);
-    location.hash = cardId;
-    sp_send(msg);
-}
-
-function revealClick(player, cardNumber, cardId) {
-    var msg = '{"mType":"Reveal"}';
-    console.log("out> "+msg);
-    sp_send(msg);
-}
-
-function sp_cardUnSelected(player) {
-    var msg = '{"player":'+player+',"mType":"CardUndrawn"}';
-    console.log("out> "+msg);
-    location.hash = "";
-    sp_send(msg);
 }
 
 var gameOutputs = document.getElementById("game-outputs");
 var playedCards = [];
 var currentRoomSize = 0;
 
-function sp_roomSize(size) {
+function roomSize(size) {
 	console.log("roomSize: "+size);
 	if( size > playedCards.length ) {
 		var expand = size - playedCards.length;
@@ -574,10 +471,7 @@ function sp_roomSize(size) {
 	}
 	
 	for( var i=0; i<size; i++ ) {
-		if( i < playedCards.length ) {
-			var card = playedCards[i];
-			card.style.visibility = 'visible';
-		}
+		playedCards[i].style.visibility = 'visible';
 	}	
 	
 	currentRoomSize = size;
@@ -595,7 +489,7 @@ function setImageSizes(size) {
 
 var currentDrawnSize = 0;
 
-function sp_drawnSize(size) {
+function drawnSize(size) {
 	console.log("drawnSize: "+size);
 	
 	if( size > currentRoomSize ) {
@@ -611,26 +505,6 @@ function sp_drawnSize(size) {
 	}
 	
 	currentDrawnSize = size;
-}
-
-function sp_recievedCardSet(cards) {
-    console.log('sp_showCards:'+JSON.stringify(cards));
-    var chosen = []
-    cards.forEach(function(cardDrawn) {
-        chosen.push(cardDrawn.card)
-    });
-    showDrawnCards(chosen)
-}
-
-function showDrawnCards(chosen) {
-	var size = chosen.length
-	console.log('length:'+size+' cards:'+chosen)
-	sp_roomSize(size);
-	for( var i=0; i<size; i++ ) {
-		var value = chosen[i];
-		var src = valueCardsMap[value];
-		playedCards[i].src = "site/"+src;
-	}
 }
 
 //  Cameron Adams resize script from http://www.themaninblue.com/experiment/ResolutionLayout/
@@ -671,6 +545,7 @@ function attachEventListener(target, eventType, functionRef, capture)
     return true;
 };
 
+
 attachEventListener(window, "resize", windowSizeEffects, false);
 
 for(var n=0; n<blackImages.length; n++){
@@ -680,17 +555,6 @@ for(var n=0; n<blackImages.length; n++){
    attachEventListener(target, "click", cardClick, false);
 }
 
-var reveal = document.getElementById("reveal_btn.png");
-attachEventListener(reveal, "mouseover", hoverButton, false);
-attachEventListener(reveal, "mouseout", unhoverButton, false);
-attachEventListener(reveal, "click", revealClick, false);
-
-var reset = document.getElementById("reset_btn.png");
-attachEventListener(reset, "mouseover", hoverButton, false);
-attachEventListener(reset, "mouseout", unhoverButton, false);
-attachEventListener(reset, "click", resetClick, false);
-
-windowSizeEffects();
 </script>
 </body>
 </html>

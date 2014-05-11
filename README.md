@@ -71,16 +71,21 @@ in>  {"cards":[{"player":"417007700350734336","card":13,"mType":"CardDrawn"},{"p
 
 shows that a player had hit the reveal cards button which sent a message of type "Reveal" to the server. The server responded with a message of type "CardSet" which contained two "CardDrawn" entries for two players which had values "8" and "13". 
 
-The complete set of messages are defined in the file ```/sprint-planning/src/main/scala/scrumpoker/game/Messages.scala```
+The complete set of JSON messages are defined in the file ```/sprint-planning/src/main/scala/scrumpoker/game/Messages.scala```
+
+Sent from server to browser:
 
 - RoomSize: Sent to all browsers when a player enters the room. Should be used to give a visual indication that more players have joined the room. Also sent to all browsers in response to a reset message. 
 - DrawnSize: Sent to all browsers when a player selects a card. Should be used to indicate how many players in the room have selected a card. A message is also sent to all browsers in response to a reset message to show zero cards drawn. 
 - CardSet: Sent to all browsers when the cards are revealed in response to a Reveal message. Contains the complete state of the game as the list of CardDrawn messages sent by all the players. 
+- Reveal: Sent from the browser to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
+- Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize and DrawnSize zero messages all being sent to all browsers to cause the game state to be cleared. 
+
+Sent from browser to server: 
+
 - CardDrawn: Sent from the browser when a player selects a card.
 - CardUndrawn: Sent from the browser when a player unselects the card they had selected. 
 - PlayerExit: Sent from the browser to the server when the browser window is closed. 
-- Reveal: Sent from the browser to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
-- Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize and DrawnSize zero messages all being sent to all browsers to cause the game state to be cleared. 
 
 License
 ----
@@ -90,10 +95,11 @@ Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 TODO
 ----
 
-[] Make an attractive skin <br/>
-[] If the room times-out ensure that all the polling players are shutdown  <br/>
-[] If the room times-out ensure that all the open websockets are closed  <br/>
-[] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
-[] Store the game history at the bottom of the browser window for reference
+[_] Make an attractive skin <br/>
+[_] If the room times-out ensure that all the polling players are shutdown  <br/>
+[_] If the room times-out ensure that all the open websockets are closed  <br/>
+[_] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
+[_] Store the game history at the bottom of the browser window for reference <br/>
+
 
 End.

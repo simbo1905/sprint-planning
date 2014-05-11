@@ -113,94 +113,98 @@ object ScrumGameApp extends Logger with SnowflakeIds {
         }
       }
 
-      case r @ HttpRequest(httpRequest) => httpRequest match {
+      case r @ HttpRequest(httpRequest) =>
+        implicit val event = httpRequest
+        httpRequest match {
 
-        /**
-         * AJAX inbound handler receiving posts from jquery.gracefulWebSocket.js
-         * Registers the user with the room on the first post which should be 'fallback'
-         */
-        case POST(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
-          player.toLongOpt match {
-            case None => log.warn(s"$player is not a long in post of $httpRequest")
-            case Some(playerId) =>
-              if (httpRequest.nettyHttpRequest.isInstanceOf[HttpContent]) {
-                val content = httpRequest.nettyHttpRequest.asInstanceOf[HttpContent].content()
-                if (content.isReadable) {
-                  val message: String = content.toString(java.nio.charset.Charset.forName("UTF8"))
-                  if (message == "handshake") {
-                    log.info(s"Fallback handshake for player $playerId to join room $roomNumber")
-                    scrumGame ! Registration(roomNumber, playerId, Polling(player))
-                    httpRequest.response.write(tsJson())
-                  } else {
-                    log.debug(s"$player -> $roomNumber -> $message")
-                    scrumGame ! Data(roomNumber, message)
-                    val future = scrumGame ? PollRequest(player)
-                    future onComplete {
-                      case Success(result) => result match {
-                        case r: PollResponse => httpRequest.response.write(r.toJson)
-                        case x => log.error(s"unknown response $x")
+          /**
+           * AJAX inbound handler receiving posts from jquery.gracefulWebSocket.js
+           * Registers the user with the room on the first post which should be 'fallback'
+           */
+          case POST(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
+            player.toLongOpt match {
+              case None => log.warn(s"$player is not a long in post of $httpRequest")
+              case Some(playerId) =>
+                if (httpRequest.nettyHttpRequest.isInstanceOf[HttpContent]) {
+                  val content = httpRequest.nettyHttpRequest.asInstanceOf[HttpContent].content()
+                  if (content.isReadable) {
+                    val message: String = content.toString(java.nio.charset.Charset.forName("UTF8"))
+                    if (message == "handshake") {
+                      log.info(s"Fallback handshake for player $playerId to join room $roomNumber")
+                      scrumGame ! Registration(roomNumber, playerId, Polling(player))
+                      httpRequest.response.write(tsJson())
+                    } else {
+                      log.debug(s"$player -> $roomNumber -> $message")
+                      scrumGame ! Data(roomNumber, message)
+                      val future = scrumGame ? PollRequest(player)
+                      future onComplete {
+                        case Success(result) => result match {
+                          case r: PollResponse => httpRequest.response.write(r.toJson)
+                          case x => log.error(s"unknown response $x")
+                        }
+                        case Failure(failure) =>
+                          log.info(s"polling failure for player:${player} in roomNumber:{roomNumber} with failure: ${failure.getMessage()}")
+                          httpRequest.response.write(closeJson)
                       }
-                      case Failure(failure) =>
-                        log.info(s"polling failure for player:${player} in roomNumber:{roomNumber} with failure: ${failure.getMessage()}")
-                        httpRequest.response.write(closeJson)
                     }
+                  } else {
+                    log.warn(s"ByteBuf content is not readable from post with headers:${httpRequest}")
                   }
+                  content.release()
                 } else {
-                  log.warn(s"ByteBuf content is not readable from post with headers:${httpRequest}")
+                  log.warn(s"nettyHttpRequest is not a HttpContent request with headers:${httpRequest}")
                 }
-                content.release()
-              } else {
-                log.warn(s"nettyHttpRequest is not a HttpContent request with headers:${httpRequest}")
-              }
-          }
-
-        /**
-         * AJAX outbound handler receiving polls from jquery.gracefulWebSocket.js
-         */
-        case GET(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
-          val future = scrumGame ? PollRequest(player)
-          future onComplete {
-            case Success(result) => result match {
-              case r: PollResponse => httpRequest.response.write(r.toJson)
-              case Close => httpRequest.response.write(closeJson)
-              case x => log.error(s"unknown response $x")
             }
-            case Failure(failure) => httpRequest.response.write(errorJson(failure))
-          }
 
-        /**
-         *  Send registering players to the main page encoding the room and their player id
-         *  Firefox and android2.3.3 seem to cache a redirect so trying 303 response rather than 302
-         */
-        case GET(PathSegments("register" :: "redirect" :: Nil)) =>
-          val player = nextId()
-          val page = httpRequest.endPoint.getQueryString("skin").getOrElse("poker.html")
-          val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
-          val url = s"/${page}?room=${room}&player=${player}"
-          httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, url)
-          httpRequest.response.write(HttpResponseStatus.SEE_OTHER)
+          /**
+           * AJAX outbound handler receiving polls from jquery.gracefulWebSocket.js
+           */
+          case GET(PathSegments("websocket" :: roomNumber :: player :: Nil)) =>
+            val future = scrumGame ? PollRequest(player)
+            future onComplete {
+              case Success(result) => result match {
+                case r: PollResponse => httpRequest.response.write(r.toJson)
+                case Close => httpRequest.response.write(closeJson)
+                case x => log.error(s"unknown response $x")
+              }
+              case Failure(failure) => httpRequest.response.write(errorJson(failure))
+            }
 
-        /**
-         * Openshift currently requires the use of a high port for websockets so we need the browser to check that this is reachable if behind a corporate firewall
-         */
-        case GET(PathSegments("websocket" :: "ports" :: Nil)) =>
-          staticContentHandlerRouter ! new StaticFileRequest(httpRequest, processInfoTempFile)
+          /**
+           *  Send registering players to the main page encoding the room and their player id
+           *  Firefox and android2.3.3 seem to cache a redirect so trying 303 response rather than 302
+           */
+          case GET(PathSegments("register" :: "redirect" :: Nil)) =>
+            val player = nextId()
+            val page = httpRequest.endPoint.getQueryString("skin").getOrElse("poker.html")
+            val room = httpRequest.endPoint.getQueryString("room").getOrElse("-1")
+            val url = s"/${page}?room=${room}&player=${player}"
+            httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, url)
+            httpRequest.response.write(HttpResponseStatus.SEE_OTHER)
 
-        /**
-         * Server static content out of contentDir defaulting to index.html and giving a 404 for favicon.ico
-         */
-        case Path("/") =>
-          staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, "index.html"))
-        case Path("/favicon.ico") =>
-          httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
-        case GET(PathSegments(fileName :: Nil)) =>
-          staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, fileName))
+          /**
+           * Openshift currently requires the use of a high port for websockets so we need the browser to check that this is reachable if behind a corporate firewall
+           */
+          case GET(PathSegments("websocket" :: "ports" :: Nil)) =>
+            staticContentHandlerRouter ! new StaticFileRequest(httpRequest, processInfoTempFile)
 
-        case unknown =>
-          log.debug(s"could not match $httpRequest contained in $r")
-          httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, "/index.html")
-          httpRequest.response.write(HttpResponseStatus.MOVED_PERMANENTLY)
-      }
+          /**
+           * Server static content out of contentDir defaulting to index.html and giving a 404 for favicon.ico
+           */
+          case Path("/") =>
+            staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, "index.html"))
+          case Path("/favicon.ico") =>
+            httpRequest.response.write(HttpResponseStatus.NOT_FOUND)
+          case GET(PathSegments(fileName :: Nil)) =>
+            staticContentHandlerRouter ! new StaticFileRequest(httpRequest, new File(contentDir, fileName))
+          case GET(PathSegments(List(folderName, fileName))) =>
+            staticContentHandlerRouter ! fileInFolderRequest(folderName, fileName)
+
+          case unknown =>
+            log.debug(s"could not match $httpRequest contained in $r")
+            httpRequest.response.headers.put(HttpHeaders.Names.LOCATION, "/index.html")
+            httpRequest.response.write(HttpResponseStatus.MOVED_PERMANENTLY)
+        }
 
       case unknown => log.warn(s"could not match ${unknown.getClass().getName()} = ${unknown}")
     })

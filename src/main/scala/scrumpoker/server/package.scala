@@ -7,6 +7,8 @@ import scrumpoker.game.PollResponse
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import akka.util.Timeout
 import java.io.PrintWriter
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.handlers.StaticFileRequest
 
 package object server {
   implicit class StringImprovements(val s: String) {
@@ -42,6 +44,10 @@ package object server {
   val contentDir = new File(contentPath);
   val staticContentHandlerConfig = StaticContentHandlerConfig(
     rootFilePaths = Seq(contentDir.getAbsolutePath, tempFile.getParentFile.getAbsolutePath))
+
+  def fileInFolderRequest(folderName: String, fileName: String)(implicit httpRequestEvent: HttpRequestEvent) = {
+    new StaticFileRequest(httpRequestEvent, new File(new File(contentDir, folderName), fileName))
+  }
 
   implicit val timeout = Timeout(1 seconds)
 

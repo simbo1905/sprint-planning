@@ -12,7 +12,7 @@ if( location.hostname.length > 0 ) {
 } else {
     // debugging a local html file point to any server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
     // it is safe to edit this hardcoded connection when testing a skin in a local file
-    socket = new WebSocket("ws://localhost:8080/websocket/"+ room + "/" + player);
+    socket = new WebSocket("ws://www.sprint-planning.info/websocket/"+ room + "/" + player);
 }
 
 /**
