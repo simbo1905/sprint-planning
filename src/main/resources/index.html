@@ -294,13 +294,13 @@ padding-left: 0px;
 		<div class="section main">
 			<h2><b>Create Or Enter A Room</b></h2>
 			<p>
-				Create or access a sprint planning session by entering number or name into the input below:
+				Create or access a sprint planning session by entering an anonymouse number or name into the input below:
 			</p>
-			<p/>
 			<p>
 <form onsubmit="return false;">
-  <input type="text" name="message" value="" class="intext"/>
-  <input type="button" value="Enter" onclick="window.location = '/register/redirect?room='+this.form.message.value" />
+  <input id="room" name="room" type="text" size="40" value="" tabindex="0" 
+  style="background-image:url('site/sprint-planning-icon-16x16.png');background-repeat:no-repeat;background-position:0 50%;padding-left:18px;border-style:solid;border-width:1px;border-color:lightgray;"
+  />
 </form>
 			</p>
 		</div>
@@ -378,6 +378,14 @@ function windowSizeEffects()
 }
 
 attachEventListener(window, "resize", windowSizeEffects, false);
+
+function checkEnter(event) {
+  if (event.keyCode == 13) {
+	window.location = '/register/redirect?room='+document.getElementById('room').value;
+  }
+}
+
+attachEventListener(document.getElementById('room'), "keydown", checkEnter, false);
 
 windowSizeEffects();
 </script>
