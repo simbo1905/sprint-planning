@@ -37,7 +37,6 @@ Create then launch a runnable jar for a server deployment with:
 sbt assembly
 java -jar ./target/scala-2.10/sprint-planning-runnable.jar 127.0.0.1 80
 ```
-
 N.B. You would need to use sudo to run the command as root to bind the server to port 80 on Mac OSX or Linux (see the "aws" scripts folder for example linux scripts). 
 
 You should see the output: 
@@ -58,7 +57,36 @@ The process takes two mandatory and two optional arguments:
 3. Websocket alternative port (defaults to static content port)
 4. Graceful websocket polling port (defaults to static content port)
 
-The file .openshift/action_hooks/README.md explains the optional parameters. 
+## Running Behind A Proxy
+
+To run the socko server on port 8888 behin an nginx proxy start socko with: 
+
+```
+java -Xmx50m -jar ../sprint-planning-runnable.jar 69.162.134.144 8888 80 80
+``` 
+
+That specifies that websockets and polling point at the nginx proxy server: 
+
+```
+server {
+        server_name www.sprint-planning.info;
+
+        location / {
+                proxy_set_header X-Real-IP  $remote_addr;
+                proxy_set_header X-Forwarded-For $remote_addr;
+                proxy_set_header Host $host;
+                proxy_pass http://www.sprint-planning.info:8888;
+        }
+
+        location /websocket/ {
+                proxy_pass http://www.sprint-planning.info:8888;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+        }
+}
+
+```
 
 ## Creating A Skin
 
