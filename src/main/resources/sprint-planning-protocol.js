@@ -8,7 +8,9 @@ var socket;
 */
 if( location.hostname.length > 0 ) {
     // connect the websocket to the same host and specified port passing the room number and player id
-    socket = $.gracefulWebSocket("ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player);
+    var wsurl = "ws://" + location.hostname + ":" + port + "/websocket/" + room + "/" + player;
+    console.log(wsurl);
+    socket = $.gracefulWebSocket(wsurl);
 } else {
     // debugging a local html file point to any server e.g. point browser at file://some/path/to/project/poker.html?room=1234&player=9887
     // it is safe to edit this hardcoded connection when testing a skin in a local file
