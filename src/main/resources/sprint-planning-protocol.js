@@ -1,5 +1,7 @@
 // websocket connection with graceful fallack
 
+if (!window.console) console = {log: function() {}};
+
 var socket;
 
 /**
