@@ -57,15 +57,18 @@ The process takes two mandatory and two optional arguments:
 3. Websocket alternative port (defaults to static content port)
 4. Graceful websocket polling port (defaults to static content port)
 
-## Running Behind A Proxy
+## Running Behind A Reverse Proxy
 
-To run the socko server on port 8888 behind an nginx proxy start socko with: 
+To run the socko server on port 8888 behind an nginx reverse proxy first 
+start socko with: 
 
 ```
 java -Xmx50m -jar ../sprint-planning-runnable.jar 69.162.134.144 8888 80 80
 ``` 
 
-That specifies that websockets and polling point at the nginx proxy server: 
+That specifies that the websockets and polling given to the browser will point 
+to the reverse proxy running on port 80. The nginx reverse proxy configuration 
+is then set to forward regular and websocket traffic to socko running on 8888: 
 
 ```
 server {
