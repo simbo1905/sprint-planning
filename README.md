@@ -8,7 +8,7 @@ When the browser does not support websockets or if a websocket cannot be opened 
 
 The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud in the .openshift folder. Linux management scripts which work on Amazon Web Services are in the aws folder. 
 
-There is a beta version running at http://www.sprint-planning.info/
+There is a version running at http://www.sprint-planning.info/
 
 ## Build Prerequisites
 
@@ -126,9 +126,9 @@ Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 TODO
 ----
 
-[_] If the room times-out ensure that all the polling players are shutdown  <br/>
-[_] If the room times-out ensure that all the open websockets are closed  <br/>
-[_] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
-[_] Drop openshift support as websockets have been in preview for too long <br/>
+[] If the room times-out ensure that all the polling players are shutdown  <br/>
+[] If the room times-out ensure that all the open websockets are closed  <br/>
+[] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
+[] Drop openshift support as websockets have been in preview for too long <br/>
 
 End.
