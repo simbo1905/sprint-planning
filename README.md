@@ -59,8 +59,8 @@ The process takes two mandatory and two optional arguments:
 
 ## Running Behind A Reverse Proxy
 
-To run the socko server on port 8888 behind an nginx reverse proxy first 
-start socko with: 
+To run the socko server on port 8888 behind an nginx reverse proxy running 
+on port 80 first start socko with: 
 
 ```
 java -Xmx50m -jar ../sprint-planning-runnable.jar 69.162.134.144 8888 80 80
