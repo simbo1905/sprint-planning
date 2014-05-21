@@ -63,7 +63,7 @@ To run the socko server on port 8888 behind an nginx reverse proxy running
 on port 80 first start socko with: 
 
 ```
-java -Xmx50m -jar ../sprint-planning-runnable.jar 69.162.134.144 8888 80 80
+java -jar sprint-planning-runnable.jar 127.0.0.1 8888 80 80
 ``` 
 
 That specifies that the websockets and polling given to the browser will point 
