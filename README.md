@@ -6,9 +6,7 @@ The browser code uses HTML5 [websockets](http://www.websocket.org/). The server 
 
 When the browser does not support websockets or if a websocket cannot be opened do to proxy issues the browser code does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX polling. 
 
-The server is a single jar file which runs on a standard Java JVM. The code comes with build and launch scripts which run on the Redhat Openshift PaaS cloud in the .openshift folder. Linux management scripts which work on Amazon Web Services are in the aws folder. 
-
-There is a version running at http://www.sprint-planning.info/
+The server is a single jar file which runs on a standard Java JVM. There is a version running at http://www.sprint-planning.info/
 
 ## Build Prerequisites
 
@@ -37,7 +35,7 @@ Create then launch a runnable jar for a server deployment with:
 sbt assembly
 java -jar ./target/scala-2.10/sprint-planning-runnable.jar 127.0.0.1 80
 ```
-N.B. You would need to use sudo to run the command as root to bind the server to port 80 on Mac OSX or Linux (see the "aws" scripts folder for example linux scripts). 
+N.B. You would need to use sudo to run the command as root to bind the server to port 80 on Mac OSX or Linux. 
 
 You should see the output: 
 
@@ -118,17 +116,14 @@ Sent from browser to server:
 - CardUndrawn: Sent from the browser when a player unselects the card they had selected. 
 - PlayerExit: Sent from the browser to the server when the browser window is closed. 
 
+What's with all the ports? 
+----
+
+At the time of writing the app RedHat OpenShift required that you run with ports "8080 8000 80". Thats the port to bind to, the port websockets is running on and the port to fallback to polling if the browser is behind a proxy which does not support websockets.  
+
 License
 ----
 
 Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
-
-TODO
-----
-
-[] If the room times-out ensure that all the polling players are shutdown  <br/>
-[] If the room times-out ensure that all the open websockets are closed  <br/>
-[] Move all logging including websocket activity to the socko logs with writeWebLog() and roll the logs<br/>
-[] Drop openshift support as websockets have been in preview for too long <br/>
 
 End.
