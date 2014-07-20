@@ -126,4 +126,9 @@ License
 
 Apache 2.0 http://apache.org/licenses/LICENSE-2.0.html
 
+TODO
+----
+
+[_] Port to Backbone.js and have it so that it remembers your card selection if you reload the page. 
+
 End.
