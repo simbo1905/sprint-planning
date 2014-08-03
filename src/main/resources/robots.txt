@@ -1,5 +1,2 @@
 User-agent: *
 Allow: /index.html
-Allow: /faq.html
-Allow: /sprint-planning.html
-Disallow: /

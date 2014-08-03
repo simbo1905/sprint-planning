@@ -4,390 +4,199 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Sprint Planning</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style type="text/css" media="screen, projection">
-.section:after,
-ul.nav:after {
-	content: ".";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
-
-/* http://meyerweb.com/eric/tools/css/reset/ */
-/* v1.0 | 20080212 */
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td { margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent; }
-body { line-height:1; }
-ol,ul { list-style:none; }
-blockquote,q { quotes:none; }
-blockquote:before,blockquote:after,q:before,q:after { content:'';content:none; }
-ins { text-decoration:none; }
-del { text-decoration:line-through; }
-table { border-collapse:collapse;border-spacing:0; }
-
-body {
-	font: normal 100% Cambria, Georgia, serif;
-	-moz-text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-	-webkit-text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-	-webkit-text-size-adjust: none;
-}
-a {
-	color: #0053a9; // #ff41d5
-	text-decoration: none;
-	-moz-transition: 0.2s color linear;
-	-webkit-transition: 0.2s color linear;
-	transition: 0.2s color linear;
-}
-a:hover {
-	color: #ff41d5;
-}
-#page {
-	padding: 2em 0;
-}
-.inner {
-	margin: 0 auto;
-	width: 93.75%;		/* 960px / 1024px */
-}
-img {
-	max-width: 100%;
-}
-.amp {
-	font-family: Baskerville, Garamond, Palatino, "Palatino Linotype", "Hoefler Text", "Times New Roman", serif;
-	font-style: italic;
-	font-weight: normal;
-}
-.mast {
-	float: left;
-	width: 31.875%;	/* 306px / 960px */
-}
-h1 {
-}
-h1 a {
-	padding-top: 117px;
-	height: 162px;
-	display: block;
-	text-align: center;
-}
-.intro,
-.main,
-.footer {
-	float: right;
-	width: 65.9375%;	/* 633px / 960px */
-}
-.intro {
-	margin-top: 117px;
-}
-.intro div {
-	line-height: 1.4;
-}
-ul.nav {
-	border-top: 1px solid #888583;
-	margin: 2em auto 0;
-	width: 64.379%;
-}
-ul.nav a {
-	font: bold 14px/1.2 "Book Antiqua", "Palatino Linotype", Georgia, serif;
-	display: block;
-	text-align: center;
-	letter-spacing: 0.1em;
-	padding: 1em 0.5em 3em;
-	margin-bottom: -1em;
-	text-transform: uppercase;
-}
-ul.nav a:hover {
-	background-position: 50% 100%;
-}
-li.first a {
-	border-top: 1px solid #FFF9EF;
-	padding-top: 1.25em;
-}
-ul.nav i {
-	font: normal 10px Baskerville, Garamond, Palatino, "Palatino Linotype", "Hoefler Text", "Times New Roman", serif;
-	display: block;
-	letter-spacing: 0.05em;
-}
-.intro h2 {
-	font: normal 2em "Hoefler Text", "Baskerville old face", Garamond, "Times New Roman", serif;
-	text-align: center;
-	margin-bottom: 0.25em;
-}
-.main h2 {
-	font-size: 1.4em;
-	text-transform: lowercase;
-	text-align: center;
-	margin: 0.75em 0 1em;
-}
-.main h2 b {
-	font-weight: normal;
-	padding: 0 1em;
-}
-.figure {
-	float: left;
-	font-size: 10px;
-	line-height: 1.1;
-	margin: 0 3.317535545023696682% 1.5em 0;			/* 21px / 633px */
-	text-align: center;
-	width: 31.121642969984202211%;				/* 197px / 633px */
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-}
-.figure b {
-	display: block;
-	font-size: 14px;
-	font-family: "Book Antiqua", "Palatino Linotype", Georgia, serif;
-	letter-spacing: 0.1em;
-}
-.figure img {
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	-webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-	-moz-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);;
-	display: block;
-	margin: 0 auto 1em;
-}
-li#f-mycroft,
-li#f-winter {
-	margin-right: 0;
-}
-.footer {
-	font-size: 12px;
-	text-align: center;
-	padding: 40px 0 20px;
-}
-.footer p {
-	margin-bottom: 0.5em;
-}
-@media (max-width: 600px) {
-	.inner {
-		position: relative;
-	}
-	.mast,
-	.intro,
-	.main,
-	.footer {
-		float: none;
-		width: auto;
-	}
-	h1 {
-		background: none;
-	}
-	h1 a {
-		padding-top: 70px;
-		height: 87px;
-	}
-	ul.nav {
-		border-top: none;
-		margin: 0 auto;
-		position: absolute;
-		top: 0;
-		width: 100%;
-	}
-	ul.nav li {
-		float: left;
-		margin-right: 3.30%;
-		width: 31.12%;
-	}
-	ul.nav a,
-	ul.nav i {
-		font: 10px Helvetica, Arial, sans-serif;
-		letter-spacing: 0;
-	}
-	ul.nav a:hover,
-	ul.nav a:focus {
-		background-position: 0 100%;
-	}
-	li.first a {
-		border-top: none;
-		padding-top: 1em;
-	}
-	ul.nav li.last {
-		margin-right: 0;
-	}
-	.intro {
-		margin-top: 0;
-	}
-	.intro h2 {
-		font-size: 1.4em;
-	}
-	input.intext {
-	border-style: solid;
-border-width: 1px;
-border-color: black;
-font-family: helvetica, arial, sans serif;
-padding-left: 0px;
-	}
-}
-@media (max-width: 400px) {
-	.figure,
-	li#f-mycroft {
-		margin-right: 3.32%;
-		width: 48.34%;
-	}
-	li#f-watson,
-	li#f-moriarty {
-		margin-right: 0;
-	}
-}
-@media (min-width: 1300px) {
-	.mast {
-		float: none;
-		width: auto;
-	}
-	h1 {
-		float: left;
-		width: 31.88%;	
-	}
-	ul.nav {
-		float: right;
-		margin: 40px 0 1em;
-		text-align: center;
-		width: 65.94%;
-	}
-	ul.nav {
-		border-top: none;
-	}
-	ul.nav li.first a {
-		border-top: none;
-		padding-top: 1em;
-	}
-	ul.nav li {
-		float: left;
-		margin-right: 3.32%;
-		width: 31.12%;
-	}
-	ul.nav li.last {
-		margin-right: 0;
-	}
-	.intro {
-		margin-top: 1em;
-	}
-	.figure,
-	li#f-mycroft {
-		margin-right: 3.32%;
-		width: 13.90%;
-	}
-	.footer {
-		clear: both;
-		float: none;
-		margin-left: 56.77%;
-		width: 20.52%;
-	}
-}
-</style>
+<meta name="keywords" content="online sprint planning, sprint planning tool, online scrum poker, scrum poker tool, online planning poker, planning poker, planning poker tool, online agile planning, agile planning, agile planning tool, online sprint estimation, sprint estimation , sprint estimation tool, online scrum estimation, scrum estimation, scrum estimation tool, online requirements estimation, requirements estimation, requirements estimation tool">
+<meta name="description" content="Sprint Planning Scrum Estimation Poker Game">
+<link rel="stylesheet" media="screen,projection,tv" href="sprint-planning.css" type="text/css">
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
 </head>
 <body>
 <div id="page">
 	<div class="inner">
-	
 		<div class="mast">
-			<h1 id="logo"><a href="#"><img id="sprint-planning-large.png" src="site/sprint-planning-large.png" alt="Sprint Planning" /></a></h1>
-			<ul class="nav">
-				<li><a href="sprint-planning.html"><i>Sprint</i> Planning</a></li>
-				<li><a href="faq.html"><i>The</i> FAQ</a></li>
-				<li class="last"><a href="https://github.com/simbo1905/sprint-planning"><i>Fork</i> Us</a></li>
-			</ul><!-- /end .nav -->
-		</div><!-- /end .mast -->
-	
-		<div class="section main">
-			<h2><b>Create Or Enter A Room</b></h2>
+			<h1 id="logo"><a href="index.html"><img id="sprint-planning-large.png" src="site/sprint-planning-large.png" alt="Sprint Planning" /></a></h1>
+			<ul class="nav pills">
+				<li class="home-pill"><a><i>Sprint</i> Planning</a></li>
+				<li class="faq-pill"><a><i>The</i> FAQ</a></li>
+				<li class="last"><a style="text-decoration: none;" href="https://github.com/simbo1905/sprint-planning"><i>Fork</i> Us</a></li>
+			</ul>
+		</div>
+		<div id="home-page" class="section main pages">
+			<h2><b>Sprint Planning</b></h2>
+<p>
+The short iteration project methodology  &laquo; Scrum &raquo; uses a developer planning meeting to identify and commit to the work which will be completed in each sprint. 
+The aims of the meeting are [<a href="http://en.wikipedia.org/wiki/Scrum_(software_development)#Sprint_planning_meeting">1</a>]: <br/><br/>
+<ol class="roman" style="list-style-type:upper-roman; margin-left: 30px;">
+<li>
+Select what work is to be done
+</li>
+<li>
+Prepare the Sprint Backlog which details the work and the time which will be taken
+</li>
+<li>
+Identify and communicate how much of the work is likely to be done during the current sprint
+</li>
+</ol>
+<br/>
+Each of these aims requires estimation. With Scrum the work is assigned to the whole team. The whole team should discuss the work, 
+agree to the estimation, and collectively commit to a set of demonstrable features or fixes within the next sprint. 
+</p>	
+<br/>
+<p>
+One challenge of group estimation for work is the <a href="http://en.wikipedia.org/wiki/Anchoring#Anchoring_and_adjustment_heuristic">cognative bias of achoring</a>. 
+The first person to state an estimate influences the people who subsequently provide an estimate.
+This creates a skewed consensus which is influenced by the order in which people speak. 
+</p>	
+<br/>
+<p>
+An established approach to counter the achoring cognative bias is to have each developer place an estimate face down onto the table. 
+A standard deck of 52 playing cards can be used for this purpose. 
+Once all of the team have placed a hidden estimate on the table they may all be revealed at once and discussed. 
+Multiple rounds of estimation and discussion can then be undertaken to form the team consensus. 
+</p>
+<br/>	
+<p>
+This website provides electronic version of cards so that not all of the development team have to be in the same room to make estimates. 
+</p>
+
 			<p>
 				Create or access a sprint planning session by entering an anonymous number or name into the input below:
 			</p>
+			<br/>
 			<p>
-<form onsubmit="return false;">
+<form action="/register/redirect">
   <input id="room" name="room" type="text" size="40" value="" tabindex="0" 
   style="background-image:url('site/sprint-planning-icon-16x16.png');background-repeat:no-repeat;background-position:0 50%;padding-left:18px;border-style:solid;border-width:1px;border-color:lightgray;"
   />
 </form>
 			</p>
-		</div>
 
-		<div class="footer">
-			<p>Code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
-			<p>Page layout by <a href="http://ethanmarcotte.com/">Ethan Marcotte</a> with tutorial <a href="http://alistapart.com/article/responsive-web-design">here</>.</p>
-		</div><!-- /end .footer -->
-	</div><!-- /end .inner -->
-</div><!-- /end #page -->
+
+</div>
+<div id="faq-page" class="section main pages">
+					<h2><b>Frequently Asked Questions</b></h2>
+<br/>
+<h4><b>What equiptment do I need to use this site?</b></h4>
+<p>
+You need individual screens and audio communications to the people you are working with. 
+This could be achieved by all sitting in a meeting room with a set of smart phones or tablets.
+Alernatively individuals may sit at their workstations and use a teleconferencing service. 
+</p>
+<br/>
+<h4><b>What information do I need to provide to use this site?</b></h4>
+<p>
+None. The service is designed to be anonymous. 
+You can use a feature number or another anonymous identifier as your planning room name. 
+It is recommended that you do not use any company names, product names, feature names, bug names, employee names or any other indentifiable information. 
+The site does not use cookies although it may use an analytics service at a future date to provide information to improve the service. 
+</p>
+<br/>
+<h4><b>What data is retained by this site?</b></h4>
+<p>
+The application server logs the room names. It is recommend that you use a distinct but unidentifiable room name such as an anonymous feature number as your planning room name. 
+</p>
+<br/>
+<h4><b>Where do I submit bugs and fixes?</b></h4>
+<p>
+Raise an issue over at the GitHub <a href="https://github.com/simbo1905/sprint-planning">project page</a> or better yet fork the code, fix it, and send us a pull request.  
+</p>
+
+</div>		
+<div class="footer">
+		<p>Code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
+		<p>Page layout by <a href="http://ethanmarcotte.com/">Ethan Marcotte</a> with tutorial <a href="http://alistapart.com/article/responsive-web-design">here</>.</p>
+</div>
 
 <!--[if lte IE 7]><script type="text/javascript" src="site/imgSizer.js"></script>
 <script type="text/javascript">
-window.onload = function() {
-	imgSizer.collate();
-}
 </script><![endif]-->
-<!--[if lte IE 6]><script type="text/javascript" src="share/ddpng.js"></script>
+<script type="text/javascript" src="site/resize.js"></script>
 <script type="text/javascript">
-DD_belatedPNG.fix('body, #page, h1, h1 img, ul.nav, ul.nav a, .main h2, .main h2 b, .footer');
-</script><![endif]-->
-<script>
-//  Cameron Adams resize script from http://www.themaninblue.com/experiment/ResolutionLayout/
 
-function getBrowserWidth()
-{
-	if (window.innerWidth)
-	{
-		return window.innerWidth;
-	}
-	else if (document.documentElement && document.documentElement.clientWidth != 0)
-	{
-		return document.documentElement.clientWidth;
-	}
-	else if (document.body)
-	{
-		return document.body.clientWidth;
-	}
-	
-	return 0;
-};
+$(function(){
+	var ApplicationRouter = Backbone.Router.extend({
 
-function attachEventListener(target, eventType, functionRef, capture)
-{
-    if (typeof target.addEventListener != "undefined")
-    {
-        target.addEventListener(eventType, functionRef, capture);
-    }
-    else if (typeof target.attachEvent != "undefined")
-    {
-        target.attachEvent("on" + eventType, functionRef);
-    }
-    else
-    {
-        return false;
-    }
+		//map url routes to contained methods
+		routes: {
+			"": "home",
+			"home": "home",
+			"faq": "faq"
+		},
 
-    return true;
-};
+		deselectPills: function(){
+			//deselect all navigation pills
+			$('ul.pills li').removeClass('active');
+		},
 
-function windowSizeEffects()
-{
-	var theWidth = getBrowserWidth();
+		selectPill: function(pill){
+			//deselect all navigation pills
+			this.deselectPills();
+			//select passed navigation pill by selector
+			$(pill).addClass('active');
+		},
 
-	if( theWidth <= 600  ) 
-	{
-		document.getElementById("sprint-planning-large.png").src = "site/sprint-planning-web.png";
-	}
-	else 
-	{
-		document.getElementById("sprint-planning-large.png").src = "site/sprint-planning-large.png";
-	}
+		hidePages: function(){
+			//hide all pages with 'pages' class
+			$('div.pages').hide();
+		},
 
-	return true;
-}
+		showPage: function(page){
+			//hide all pages
+			this.hidePages();
+			//show passed page by selector
+			$(page).show();
+		},
 
-attachEventListener(window, "resize", windowSizeEffects, false);
+		home: function() {
+			this.showPage('div#home-page');
+			this.selectPill('li.home-pill');
+		},
 
-function checkEnter(event) {
-  if (event.keyCode == 13) {
-	window.location = '/register/redirect?room='+document.getElementById('room').value;
-  }
-}
+		faq: function() {
+			this.showPage('div#faq-page');
+			this.selectPill('li.faq-pill');
+		}
 
-attachEventListener(document.getElementById('room'), "keydown", checkEnter, false);
+	});
 
-windowSizeEffects();
+	var ApplicationView = Backbone.View.extend({
+
+		//bind view to body element (all views should be bound to DOM elements)
+		el: $('body'),
+
+		//observe navigation click events and map to contained methods
+		events: {
+			'click ul.pills li.home-pill a': 'displayHome',
+			'click ul.pills li.faq-pill a': 'displayFAQ'
+		},
+
+		//called on instantiation
+		initialize: function(){
+			//set dependency on ApplicationRouter
+			this.router = new ApplicationRouter();
+
+			//call to begin monitoring uri and route changes
+			Backbone.history.start();
+		},
+
+		displayHome: function(){
+			//update url and pass true to execute route method
+			this.router.navigate("home", true);
+		},
+
+		displayFAQ: function(){
+			//update url and pass true to execute route method
+			this.router.navigate("faq", true);
+		}
+
+	});
+
+	//load application
+	new ApplicationView();
+
+});
 </script>
 </body>
 </html>
