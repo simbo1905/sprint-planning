@@ -4,7 +4,7 @@ A lightweight implementation of a Sprint Planning (aka Scrum Poker) web applicat
 
 The browser code uses HTML5 [websockets](http://www.websocket.org/). The server logic is written in [Scala](http://www.scala-lang.org/) using the core [Akka](http://akka.io/) libraries for concurrency and [reactive programming](http://www.reactivemanifesto.org/). The networking layer is [Netty 4](https://github.com/netty/netty) with HTTP routing provided by the awesome [Socko](https://github.com/mashupbots/socko) server. 
 
-When the browser does not support websockets or if a websocket cannot be opened do to proxy issues the browser code does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX polling. 
+When the browser does not support websockets or if a websocket cannot be opened due to proxy issues the browser code does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX polling. 
 
 The server is a single jar file which runs on a standard Java JVM. There is a version running at http://www.sprint-planning.info/
 
@@ -64,7 +64,7 @@ on port 80 first start socko with:
 java -jar sprint-planning-runnable.jar 127.0.0.1 8888 80 80
 ``` 
 
-That specifies that the websockets and polling given to the browser will point 
+That specifies that the websocket and polling fallback ports given to the browser will point 
 to the reverse proxy running on port 80. The nginx reverse proxy configuration 
 is then set to forward regular and websocket traffic to socko running on 8888: 
 
@@ -108,7 +108,7 @@ Sent from server to browser:
 - DrawnSize: Sent to all browsers when a player selects a card. Should be used to indicate how many players in the room have selected a card. A message is also sent to all browsers in response to a reset message to show zero cards drawn. 
 - CardSet: Sent to all browsers when the cards are revealed in response to a Reveal message. Contains the complete state of the game as the list of CardDrawn messages sent by all the players. 
 - Reveal: Sent from the browser to the server when a player presses the reveal button. Results in a CardSet being sent to all browsers. 
-- Reset: Sent from the browser to the server when a player presses the rest button. Results in a Reset, RoomSize and DrawnSize zero messages all being sent to all browsers to cause the game state to be cleared. 
+- Reset: Sent from the browser to the server when a player presses the reset button. Results in a Reset, RoomSize and DrawnSize zero messages all being sent to all browsers to cause the game state to be cleared. 
 
 Sent from browser to server: 
 
