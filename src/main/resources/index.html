@@ -26,7 +26,7 @@
 		<div id="home-page" class="section main pages">
 			<h2><b>Sprint Planning</b></h2>
 <p>
-The short iteration project methodology  &laquo; Scrum &raquo; uses a developer planning meeting to identify and commit to the work which will be completed in each sprint. 
+The agile methodology &laquo;Scrum&raquo; uses a developer planning meeting to identify and commit to the work which will be completed in each sprint. 
 The aims of the meeting are [<a href="http://en.wikipedia.org/wiki/Scrum_(software_development)#Sprint_planning_meeting">1</a>]: <br/><br/>
 <ol class="roman" style="list-style-type:upper-roman; margin-left: 30px;">
 <li>
@@ -40,25 +40,26 @@ Identify and communicate how much of the work is likely to be done during the cu
 </li>
 </ol>
 <br/>
-Each of these aims requires estimation. With Scrum the work is assigned to the whole team. The whole team should discuss the work, 
+Each of these aims requires estimation. With scrum the work is assigned to the whole team. The whole team should discuss the work, 
 agree to the estimation, and collectively commit to a set of demonstrable features or fixes within the next sprint. 
 </p>	
 <br/>
 <p>
-One challenge of group estimation for work is the <a href="http://en.wikipedia.org/wiki/Anchoring#Anchoring_and_adjustment_heuristic">cognative bias of achoring</a>. 
+One challenge of group estimation for work is the cognitive bias of <a href="http://en.wikipedia.org/wiki/Anchoring#Anchoring_and_adjustment_heuristic">anchoring</a>. 
 The first person to state an estimate influences the people who subsequently provide an estimate.
 This creates a skewed consensus which is influenced by the order in which people speak. 
 </p>	
 <br/>
 <p>
-An established approach to counter the achoring cognative bias is to have each developer place an estimate face down onto the table. 
+An established approach to counter anchoring is to have each developer place an estimate face down onto the table. 
 A standard deck of 52 playing cards can be used for this purpose. 
 Once all of the team have placed a hidden estimate on the table they may all be revealed at once and discussed. 
-Multiple rounds of estimation and discussion can then be undertaken to form the team consensus. 
+Multiple rounds of estimation and discussion can then be undertaken to form the team consensus.
+This planning and estimation activity which is known as &laquo;Poker&raquo;. 
 </p>
 <br/>	
 <p>
-This website provides electronic version of cards so that not all of the development team have to be in the same room to make estimates. 
+This site provides electronic version of cards so that the team does not have to be in the same room to make estimates. 
 </p>
 	<h2><b>Enter Room</b></h2>
 			<p>
@@ -72,18 +73,16 @@ This website provides electronic version of cards so that not all of the develop
   />
 </form>
 			</p>
-
-
 </div>
 <div id="faq-page" class="section main pages">
 					<h2><b>Frequently Asked Questions</b></h2>
 <br/>
-<h4><b>What equiptment do I need to use this site?</b></h4>
+<h4><b>What equipment do I need to use this site?</b></h4>
 <br/>
 <p>
 You need individual screens and audio communications to the people you are working with. 
 This could be achieved by all sitting in a meeting room with a set of smart phones or tablets.
-Alernatively individuals may sit at their workstations and use a teleconferencing service. 
+Alternatively individuals may sit at remote locations and use a teleconferencing service. 
 </p>
 <br/>
 <h4><b>What information do I need to provide to use this site?</b></h4>
@@ -91,7 +90,7 @@ Alernatively individuals may sit at their workstations and use a teleconferencin
 <p>
 None. The service is designed to be anonymous. 
 You can use a feature number or another anonymous identifier as your planning room name. 
-It is recommended that you do not use any company names, product names, feature names, bug names, employee names or any other indentifiable information. 
+It is recommended that you do not use any company names, product names, feature names, bug names, employee names or any other identifiable information. 
 The site does not use cookies although it may use an analytics service at a future date to provide information to improve the service. 
 </p>
 <br/>
@@ -117,11 +116,9 @@ Raise an issue over at the GitHub <a href="https://github.com/simbo1905/sprint-p
 </script><![endif]-->
 <script type="text/javascript" src="site/resize.js"></script>
 <script type="text/javascript">
-
 $(function(){
 	var ApplicationRouter = Backbone.Router.extend({
 
-		//map url routes to contained methods
 		routes: {
 			"": "home",
 			"home": "home",
@@ -129,26 +126,20 @@ $(function(){
 		},
 
 		deselectPills: function(){
-			//deselect all navigation pills
 			$('ul.pills li').removeClass('active');
 		},
 
 		selectPill: function(pill){
-			//deselect all navigation pills
 			this.deselectPills();
-			//select passed navigation pill by selector
 			$(pill).addClass('active');
 		},
 
 		hidePages: function(){
-			//hide all pages with 'pages' class
 			$('div.pages').hide();
 		},
 
 		showPage: function(page){
-			//hide all pages
 			this.hidePages();
-			//show passed page by selector
 			$(page).show();
 		},
 
@@ -166,37 +157,28 @@ $(function(){
 
 	var ApplicationView = Backbone.View.extend({
 
-		//bind view to body element (all views should be bound to DOM elements)
 		el: $('body'),
 
-		//observe navigation click events and map to contained methods
 		events: {
 			'click ul.pills li.home-pill a': 'displayHome',
 			'click ul.pills li.faq-pill a': 'displayFAQ'
 		},
 
-		//called on instantiation
 		initialize: function(){
-			//set dependency on ApplicationRouter
 			this.router = new ApplicationRouter();
 
-			//call to begin monitoring uri and route changes
 			Backbone.history.start();
 		},
 
 		displayHome: function(){
-			//update url and pass true to execute route method
 			this.router.navigate("home", true);
 		},
 
 		displayFAQ: function(){
-			//update url and pass true to execute route method
 			this.router.navigate("faq", true);
 		}
-
 	});
 
-	//load application
 	new ApplicationView();
 });
 </script>
