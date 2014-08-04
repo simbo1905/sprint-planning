@@ -18,9 +18,9 @@
 		<div class="mast">
 			<h1 id="logo"><a href="index.html"><img id="sprint-planning-large.png" src="site/sprint-planning-large.png" alt="Sprint Planning" /></a></h1>
 			<ul class="nav pills">
-				<li class="home-pill"><a><i>Sprint</i> Planning</a></li>
-				<li class="faq-pill"><a><i>The</i> FAQ</a></li>
-				<li class="last"><a style="text-decoration: none;" href="https://github.com/simbo1905/sprint-planning"><i>Fork</i> Us</a></li>
+				<li class="home-pill"><a href="#home"><i>Sprint</i> Planning</a></li>
+				<li class="faq-pill"><a href="#faq"><i>The</i> FAQ</a></li>
+				<li class="last"><a href="https://github.com/simbo1905/sprint-planning"><i>Fork</i> Us</a></li>
 			</ul>
 		</div>
 		<div id="home-page" class="section main pages">
@@ -79,6 +79,7 @@ This website provides electronic version of cards so that not all of the develop
 					<h2><b>Frequently Asked Questions</b></h2>
 <br/>
 <h4><b>What equiptment do I need to use this site?</b></h4>
+<br/>
 <p>
 You need individual screens and audio communications to the people you are working with. 
 This could be achieved by all sitting in a meeting room with a set of smart phones or tablets.
@@ -86,6 +87,7 @@ Alernatively individuals may sit at their workstations and use a teleconferencin
 </p>
 <br/>
 <h4><b>What information do I need to provide to use this site?</b></h4>
+<br/>
 <p>
 None. The service is designed to be anonymous. 
 You can use a feature number or another anonymous identifier as your planning room name. 
@@ -94,15 +96,16 @@ The site does not use cookies although it may use an analytics service at a futu
 </p>
 <br/>
 <h4><b>What data is retained by this site?</b></h4>
+<br/>
 <p>
-The application server logs the room names. It is recommend that you use a distinct but unidentifiable room name such as an anonymous feature number as your planning room name. 
+The application server logs the room names. It is recommend that you use a distinct but unidentifiable room name such as an anonymous feature number as your planning room name. If you are using a teleconference service you could use the meeting number of pin as the room name. 
 </p>
 <br/>
 <h4><b>Where do I submit bugs and fixes?</b></h4>
+<br/>
 <p>
 Raise an issue over at the GitHub <a href="https://github.com/simbo1905/sprint-planning">project page</a> or better yet fork the code, fix it, and send us a pull request.  
 </p>
-
 </div>		
 <div class="footer">
 		<p>Code by <a href="https://github.com/simbo1905/sprint-planning">simbo1905</a>.</p>
@@ -195,7 +198,6 @@ $(function(){
 
 	//load application
 	new ApplicationView();
-
 });
 </script>
 </body>
