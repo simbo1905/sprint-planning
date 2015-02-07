@@ -18,7 +18,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.GivenWhenThen
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
+import org.scalatest.WordSpecLike
 import akka.testkit.TestActorRef
 import org.scalatest.junit.JUnitRunner
 import akka.actor.ReceiveTimeout
@@ -26,7 +26,7 @@ import akka.actor.ReceiveTimeout
 @RunWith(classOf[JUnitRunner])
 class PollingPlayerActorSpec extends TestKit(ActorSystem("PollingPlayerActorSpec"))
   with DefaultTimeout with ImplicitSender
-  with FunSpec with MustMatchers with GivenWhenThen with BeforeAndAfterAll {
+  with WordSpecLike with MustMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   import Message._
 
@@ -36,55 +36,55 @@ class PollingPlayerActorSpec extends TestKit(ActorSystem("PollingPlayerActorSpec
 
   val player = "player101"
 
-  describe("the polling player actor") {
+  "polling player actor" should {
 
-    it("should initially be empty") {
-      Given("a polling player actor")
+    "initially be empty" in {
+      //Given("a polling player actor")
       val pollingPlayer = TestActorRef(Props(classOf[PollingPlayerActor], player))
 
-      When("it is polled")
+      //When("it is polled")
       pollingPlayer ! PollRequest("player101")
 
-      Then("it responds with an empty response")
+      //Then("it responds with an empty response")
       expectMsg(PollResponse(List()))
     }
 
-    it("should respond to a receive timeout by sending stop to its parent ") {
+    "respond to a receive timeout by sending stop to its parent " in {
 
-      Given("a polling player actor")
+      //Given("a polling player actor")
       val pollingPlayer = actorWithParent(Props(classOf[PollingPlayerActor], player))
 
-      When("it is sees a timeout")
+      //When("it is sees a timeout")
       pollingPlayer ! ReceiveTimeout
 
-      Then("it responds with an empty response")
+      //Then("it responds with an empty response")
       expectMsg(StopPlayer(player))
 
     }
 
-    it("should buffer messages and return them in order when polled") {
-      Given("a polling player actor")
+    "buffer messages and return them in order when polled" in {
+      //Given("a polling player actor")
       val pollingPlayer = TestActorRef(Props(classOf[PollingPlayerActor], player))
 
-      When("it is sent to messages then polled")
+      //When("it is sent to messages then polled")
       pollingPlayer ! "hello"
       pollingPlayer ! "world"
       pollingPlayer ! PollRequest(player)
 
-      Then("it responds with the enqueued messages")
+      //Then("it responds with the enqueued messages")
       expectMsg(PollResponse(Seq("hello", "world")))
     }
 
-    it("should clear its buffer when polled") {
-      Given("a polling player actor")
+    "clear its buffer when polled" in {
+      //Given("a polling player actor")
       val pollingPlayer = TestActorRef(Props(classOf[PollingPlayerActor], player))
 
-      When("it is sent to messages then polled")
+      //When("it is sent to messages then polled")
       pollingPlayer ! "hello"
       pollingPlayer ! PollRequest(player)
       pollingPlayer ! PollRequest(player)
 
-      Then("it responds with the enqueued messages")
+      //Then("it responds with the enqueued messages")
       expectMsg(PollResponse(Seq("hello")))
       expectMsg(PollResponse(Seq()))
     }

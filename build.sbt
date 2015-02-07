@@ -10,7 +10,7 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.0.13",
   "junit" % "junit" % "4.8" % "test->default",
   "org.mockito" % "mockito-core" % "1.9.5" % "test->default",
-  "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
+  "org.scalatest" % "scalatest_2.11" % "2.1.7" % "test",
   "com.typesafe.akka" %% "akka-testkit" % "2.3.6" % "test"
   )
 

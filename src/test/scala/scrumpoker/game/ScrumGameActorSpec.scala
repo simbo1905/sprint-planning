@@ -7,7 +7,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.BeforeAndAfterAll
 import akka.testkit.DefaultTimeout
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
+import org.scalatest.WordSpecLike
 import akka.actor.ActorSystem
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -23,22 +23,22 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 @RunWith(classOf[JUnitRunner])
 class ScrumGameActorSpec extends TestKit(ActorSystem("ScrumGameActorSpec"))
   with DefaultTimeout with ImplicitSender
-  with FunSpec with MustMatchers with GivenWhenThen with BeforeAndAfterAll with MockitoSugar {
+  with WordSpecLike with MustMatchers with GivenWhenThen with BeforeAndAfterAll with MockitoSugar {
 
   override def afterAll {
     system.shutdown
   }
 
-  describe("scrum game actor") {
-    it("should send json response messages to the webserver websockets") {
-      Given("a scrum game actor with a mock webserver")
+  "scrum game actor" should {
+    "should send json response messages to the webserver websockets" in {
+     // Given("a scrum game actor with a mock webserver")
       val wsc = mock[WebSocketConnections]
       val scrumGame = TestActorRef(Props(new ScrumGameActor(wsc)))
 
-      When("it is sent some json for some websockets")
+      //When("it is sent some json for some websockets")
       scrumGame ! Response(Seq("hello", "world"), Set(Websocket("ws1"), Websocket("ws2")))
 
-      Then("both messages are sent out to all websockets")
+     // Then("both messages are sent out to all websockets")
       captureTextSentToConnections(wsc, 2) must equal(Seq((Set("ws1", "ws2"), "hello"), (Set("ws1", "ws2"), "world")))
     }
   }
