@@ -1,5 +1,7 @@
 # Sprint Planning
 
+[![Join the chat at https://gitter.im/simbo1905/sprint-planning](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/simbo1905/sprint-planning?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A lightweight implementation of a Sprint Planning (aka Scrum Poker) web application. 
 
 The browser code uses HTML5 [websockets](http://www.websocket.org/). The server logic is written in [Scala](http://www.scala-lang.org/) using the core [Akka](http://akka.io/) libraries for concurrency and [reactive programming](http://www.reactivemanifesto.org/). The networking layer is [Netty 4](https://github.com/netty/netty) with HTTP routing provided by the awesome [Socko](https://github.com/mashupbots/socko) server. 
