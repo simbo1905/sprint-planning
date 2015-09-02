@@ -102,7 +102,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
       /**
        * Websocket inbound message
        */
-      case WebSocketFrame(wsFrame) => {
+      case f@WebSocketFrame(wsFrame) => {
         log.debug("chat from:" + wsFrame.webSocketId);
         wsFrame.endPoint.pathSegments match {
           case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
@@ -111,6 +111,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
             log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
             None
         }
+        f.wsFrame.release()
       }
 
       case r @ HttpRequest(httpRequest) =>
