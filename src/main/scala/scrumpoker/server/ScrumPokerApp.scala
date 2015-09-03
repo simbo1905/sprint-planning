@@ -15,19 +15,12 @@ package scrumpoker.server
 
 import java.io.File
 import scala.Array.canBuildFrom
-import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.events.{WebSocketFrameEvent, HttpResponseStatus}
 import org.mashupbots.socko.handlers.StaticContentHandler
 import org.mashupbots.socko.handlers.StaticContentHandlerConfig
 import org.mashupbots.socko.handlers.StaticFileRequest
 import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.POST
-import org.mashupbots.socko.routes.HttpRequest
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.PathSegments
-import org.mashupbots.socko.routes.Routes
-import org.mashupbots.socko.routes.WebSocketFrame
-import org.mashupbots.socko.routes.WebSocketHandshake
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 import org.mashupbots.socko.webserver.WebSocketConnections
@@ -43,8 +36,7 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
 import io.netty.handler.codec.http.HttpContent
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
-import scala.util.Failure
+import scala.util.{Try, Success, Failure}
 import scrumpoker.game.Polling
 import scrumpoker.game.Registration
 import scrumpoker.game.Close
@@ -54,6 +46,15 @@ import io.netty.handler.codec.http.HttpHeaders
 
 // TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
+
+  // should be a sock util function? 
+  def releaseAfter(f: WebSocketFrameEvent)( work: => Unit ) = {
+    Try {
+      work
+    } match {
+      case _ => f.wsFrame.release()
+    }
+  }
 
   val actorSystem = ActorSystem("ScrumPokerActorSystem", ConfigFactory.parseString(actorConfig))
 
@@ -103,15 +104,16 @@ object ScrumGameApp extends Logger with SnowflakeIds {
        * Websocket inbound message
        */
       case f@WebSocketFrame(wsFrame) => {
-        log.debug("chat from:" + wsFrame.webSocketId);
-        wsFrame.endPoint.pathSegments match {
-          case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
-            scrumGame ! Data(roomNumber, wsFrame.readText())
-          case _ =>
-            log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
-            None
+        releaseAfter(f)  {
+          log.debug("ws data from:" + wsFrame.webSocketId);
+          wsFrame.endPoint.pathSegments match {
+            case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
+              scrumGame ! Data(roomNumber, wsFrame.readText())
+            case _ =>
+              log.warn(s"invalid wsFrame endpoint: ${wsFrame.endPoint}")
+              None
+          }
         }
-        f.wsFrame.release()
       }
 
       case r @ HttpRequest(httpRequest) =>
