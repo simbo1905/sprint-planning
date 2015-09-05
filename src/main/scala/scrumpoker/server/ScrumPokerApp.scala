@@ -47,8 +47,8 @@ import io.netty.handler.codec.http.HttpHeaders
 // TODO class is too big with too many imports it needs to be broken up
 object ScrumGameApp extends Logger with SnowflakeIds {
 
-  // should be a sock util function? 
-  def releaseAfter(f: WebSocketFrameEvent)( work: => Unit ) = {
+  // should be a socko util function?
+  def releaseFrameAfterUse(f: WebSocketFrameEvent)( work: => Unit ) = {
     Try {
       work
     } match {
@@ -104,7 +104,7 @@ object ScrumGameApp extends Logger with SnowflakeIds {
        * Websocket inbound message
        */
       case f@WebSocketFrame(wsFrame) => {
-        releaseAfter(f)  {
+        releaseFrameAfterUse(f)  {
           log.debug("ws data from:" + wsFrame.webSocketId);
           wsFrame.endPoint.pathSegments match {
             case "websocket" :: roomNumber :: playerId :: Nil if roomNumber != "" && playerId != "" =>
