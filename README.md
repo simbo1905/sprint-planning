@@ -8,7 +8,7 @@ The browser code uses HTML5 [websockets](http://www.websocket.org/). The server 
 
 When the browser does not support websockets or if a websocket cannot be opened due to proxy issues the browser code does a [graceful fallback](https://github.com/ffdead/jquery-graceful-websocket) to AJAX polling. 
 
-The server is a single jar file which runs on a standard Java JVM. There is a version running at http://www.sprint-planning.info/
+The server is a single jar file which runs on a standard Java JVM. 
 
 ## Build Prerequisites
 
